@@ -58,14 +58,14 @@ npm run qr       # regenerate QR codes → qr/
 All studio data lives in [src/data/studios.js](src/data/studios.js). Every published studio is shown
 immediately (no search or filters), and the cards, counts, map and footer update automatically.
 
-- `published: false` hides an entry completely. Location 5 (`studio-5`) is kept this way until its
-  details are confirmed: fill in `name`, `city`, `street` and `website` or `facebook`, then set `published: true`.
-  Incomplete entries stay hidden even when marked as published.
+- Five confirmed locations: Wrocław Szczepin, Wrocław Swojczyce (website ends in **.com**; Szczepin's ends in **.pl**),
+  Wrocław Zwycięska, Bielany Wrocławskie (Facebook only) and Strzelin.
+- `published: false` hides an entry completely; incomplete entries stay hidden even when published.
 - Primary button: **Odwiedź stronę** when `website` is set, otherwise **Odwiedź Facebook**.
-  Secondary button: **Wyznacz trasę** (Google Maps directions built from the street address or verified `coordinates`).
-- Layout: one column on mobile, two on tablet; on desktop, three per row (5 studios → 3 + 2 centred),
-  with 4 studios shown as a balanced 2 × 2 grid.
-- Optional fields (`district`, `facebook`, `instagram`, `coordinates`) can stay `null`; the UI hides what is missing.
+  Secondary button: **Wyznacz trasę** (Google Maps directions built from the street address).
+- Layout: one column on mobile, two on tablet; on desktop 3 + 2 centred
+  (a 4-studio list would switch to a balanced 2 × 2 grid).
+- Optional fields (`district`, `facebook`, `instagram`) can stay `null`; the UI hides what is missing.
 
 Only enter verified information.
 
@@ -79,8 +79,8 @@ Media is detected at build time, so the site never links to a file that does not
 | Hero video (desktop) | `public/videos/studio-figura-hero.mp4` | H.264, 1920×1080 or less, 8–15 s seamless loop, no audio, ideally < 4 MB |
 | Hero video, WebM (optional) | `public/videos/studio-figura-hero.webm` | VP9, offered first to browsers that support it |
 | Hero video, mobile (optional) | `public/videos/studio-figura-hero-mobile.mp4` | Portrait 720×1280, < 2 MB. Without it, phones show the still image (faster for QR visitors) |
-| Hero poster / still | `public/images/hero-poster.webp` (or `.jpg`) | ~1920×1080, < 250 KB. Shown before the video loads and as the mobile background |
-| Studio photos | `public/images/studios/<id>.webp` (or `.jpg`) | `<id>` from studios.js: `strzelin.webp`, `wroclaw-zwycieska.webp`, `wroclaw-szczepin.webp`, `bielany-wroclawskie.webp`. 1200×750 (16:10), < 200 KB |
+| Hero poster / still | `public/images/hero-poster.webp` (or `.jpg`) | ~1920×1080, < 250 KB. Shown in the hero's arch frame before the video loads. When present, phones also show the frame |
+| Studio photos | `public/images/studios/<id>.webp` (or `.jpg`) | `<id>` from studios.js: `wroclaw-szczepin.webp`, `wroclaw-swojczyce.webp`, `wroclaw-zwycieska.webp`, `bielany-wroclawskie.webp`, `strzelin.webp`. 1200×750 (16:10), < 200 KB |
 
 Without media, the hero uses built-in brand artwork, and each card gets its own distinct illustrative artwork (clearly abstract, not a photo of the location).
 Video never loads for visitors with *reduced motion* or *data saver* enabled.
@@ -91,9 +91,23 @@ Swap it for the official Studio Figura logo once an authorised asset is supplied
 
 ## Map
 
-The map loads Google Maps only after the visitor clicks *Pokaż mapę*, for privacy and performance.
-It uses the street address. Once verified coordinates are known, add
-`coordinates: { lat, lng }` to a studio to pin the exact location.
+The *Znajdź nas na mapie* section shows all studios on one map, built with
+[Leaflet](https://leafletjs.com/) and OpenStreetMap tiles (no API key or billing).
+
+- Leaflet (~43 KB gzipped) loads lazily when the section approaches the viewport.
+- Markers use `coordinates` in studios.js. Each studio has building-level coordinates from
+  OpenStreetMap / Nominatim, checked on 2026-10-31. A studio without `coordinates` is left off the map.
+- Clicking a marker or a list entry opens a popup with the primary link and **Wyznacz trasę**.
+- The map never captures the mouse wheel. On phones, the first tap unlocks dragging, so page scrolling is never trapped.
+- OpenStreetMap tiles are free under the [tile usage policy](https://operations.osmfoundation.org/policies/tiles/),
+  which suits a small site. For heavy traffic, switch the URL in `StudioMap.jsx` to a commercial tile provider.
+
+## Visual identity
+
+The palette follows the client's white, black and champagne-gold branding. Tokens live in `src/index.css`:
+`ivory-*` (warm whites, background `#FAF8F4`, surfaces `#FFFFFF`), `ink-*` (charcoal text `#171717`,
+secondary `#66615B`, dark `#141414`) and `gold-*` (`#B6975C`, light `#E8DDC8`; use `gold-600` for gold text).
+Black is reserved for buttons, map markers and the footer.
 
 ## Domain, redirects and QR codes
 

@@ -29,18 +29,18 @@ export default function StudioDirectory({ studios }) {
           <Reveal>
             <h2
               id="studia-heading"
-              className="font-serif text-[2.5rem] leading-[1.02] text-forest-900 sm:text-6xl lg:text-7xl"
+              className="font-serif text-[2.5rem] leading-[1.02] text-ink-900 sm:text-6xl lg:text-7xl"
             >
               Znajdź swoje <em className="text-gold-600">Studio&nbsp;Figura</em>
             </h2>
           </Reveal>
           <Reveal delay={0.1}>
-            <p className="mx-auto mt-4 max-w-md text-[1.05rem] leading-relaxed text-forest-800/80 md:mt-6 md:text-lg">
+            <p className="mx-auto mt-4 max-w-md text-[1.05rem] leading-relaxed text-ink-600 md:mt-6 md:text-lg">
               Wybierz najbliższe studio — przejdź na jego stronę lub wyznacz trasę.
             </p>
           </Reveal>
           <Reveal delay={0.16}>
-            <span aria-hidden="true" className="mx-auto mt-7 block h-px w-16 bg-gold-400/70 md:mt-9" />
+            <span aria-hidden="true" className="mx-auto mt-7 block h-px w-16 bg-gold-400 md:mt-9" />
           </Reveal>
         </div>
 

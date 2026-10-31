@@ -28,21 +28,21 @@ export default function BrandStatement({ studioCount, places }) {
     <section
       id="o-nas"
       aria-labelledby="o-nas-heading"
-      className="grain relative isolate overflow-hidden bg-forest-900 py-20 text-ivory-100 md:py-36"
+      className="relative isolate overflow-hidden bg-ivory-200 py-20 text-ink-900 md:py-36"
     >
       <motion.div
         aria-hidden="true"
         style={reduceMotion ? undefined : { y: glowY }}
-        className="absolute -right-1/4 top-0 -z-10 h-[120%] w-[80%] rounded-full bg-[radial-gradient(circle,rgba(201,169,110,0.16)_0%,transparent_65%)] blur-2xl"
+        className="absolute -right-1/4 top-0 -z-10 h-[120%] w-[80%] rounded-full bg-[radial-gradient(circle,rgba(182,151,92,0.18)_0%,transparent_65%)] blur-2xl"
       />
 
       <div className="mx-auto max-w-6xl px-5 sm:px-8 lg:px-12">
-        <Reveal as="p" className="eyebrow mb-8 flex items-center gap-4 text-gold-300 md:mb-12">
-          <span aria-hidden="true" className="h-px w-10 bg-gold-400/60" />
+        <Reveal as="p" className="eyebrow mb-8 flex items-center gap-4 text-gold-600 md:mb-12">
+          <span aria-hidden="true" className="h-px w-10 bg-gold-400" />
           <span id="o-nas-heading">Studio Figura</span>
         </Reveal>
 
-        <p ref={ref} className="font-serif text-[2rem] leading-[1.15] text-ivory-50 sm:text-5xl md:text-6xl lg:text-[4.4rem]">
+        <p ref={ref} className="font-serif text-[2rem] leading-[1.15] text-ink-900 sm:text-5xl md:text-6xl lg:text-[4.4rem]">
           {words.map((word, i) => (
             <Word
               key={i}
@@ -55,13 +55,13 @@ export default function BrandStatement({ studioCount, places }) {
           ))}
         </p>
 
-        <div className="mt-14 flex flex-col gap-6 border-t border-ivory-100/10 pt-8 sm:flex-row sm:items-end sm:gap-12 md:mt-20">
+        <div className="mt-14 flex flex-col gap-6 border-t border-gold-300/60 pt-8 sm:flex-row sm:items-end sm:gap-12 md:mt-20">
           <Reveal>
-            <p className="font-serif text-5xl text-gold-200 md:text-6xl">{studioCount}</p>
-            <p className="eyebrow mt-2 text-ivory-100/60">{plural(studioCount, ['Studio', 'Studia', 'Studiów'])}</p>
+            <p className="font-serif text-5xl text-gold-500 md:text-6xl">{studioCount}</p>
+            <p className="eyebrow mt-2 text-ink-600">{plural(studioCount, ['Studio', 'Studia', 'Studiów'])}</p>
           </Reveal>
           <Reveal delay={0.1}>
-            <p className="font-serif text-2xl italic leading-snug text-ivory-100/80 md:text-3xl">{places.join(' · ')}</p>
+            <p className="font-serif text-2xl italic leading-snug text-ink-700 md:text-3xl">{places.join(' · ')}</p>
           </Reveal>
         </div>
       </div>

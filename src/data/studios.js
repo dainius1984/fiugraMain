@@ -1,35 +1,48 @@
 /**
- * Central list of Studio Figura locations.
+ * Central list of Studio Figura locations — the five locations confirmed by the client.
  *
  * Only add information that has been verified with the studio.
  * Leave optional fields as `null` — the UI hides anything that is missing.
  *
  * Fields:
  *  - id          unique slug; a photo at /public/images/studios/<id>.webp|jpg is picked up automatically
- *  - published   false keeps the entry out of the website entirely (no empty or placeholder card)
+ *  - published   false hides the entry from the website entirely
  *  - name        full studio name
- *  - city        city / town (shown on the card and used for navigation)
+ *  - city        city / town
  *  - district    optional district name (shown as the card's short label)
  *  - street      street address
  *  - website     official studio website (https), or null
  *  - facebook    official Facebook page URL, or null
  *                (cards link to the website when present, otherwise to Facebook)
  *  - instagram   official Instagram profile URL, or null
- *  - coordinates { lat, lng } — only verified values, or null
- *                (navigation and the map fall back to the street address when null)
+ *  - coordinates { lat, lng } of the building, used for the overview map.
+ *                Source: OpenStreetMap / Nominatim, house-level match for each street address
+ *                (checked 2026-10-31). "Wyznacz trasę" always navigates by street address.
  */
 export const studios = [
   {
-    id: 'strzelin',
+    id: 'wroclaw-szczepin',
     published: true,
-    name: 'Studio Figura Strzelin',
-    city: 'Strzelin',
-    district: null,
-    street: 'ul. Fabryczna 25',
-    website: 'https://studiofigurastrzelin.pl/',
+    name: 'Studio Figura Wrocław Szczepin',
+    city: 'Wrocław',
+    district: 'Szczepin',
+    street: 'ul. Michalczyka 3C',
+    website: 'https://studiofigurawroclaw.pl/',
     facebook: null,
     instagram: null,
-    coordinates: null,
+    coordinates: { lat: 51.119799, lng: 17.0173832 },
+  },
+  {
+    id: 'wroclaw-swojczyce',
+    published: true,
+    name: 'Studio Figura Wrocław Swojczyce',
+    city: 'Wrocław',
+    district: 'Swojczyce',
+    street: 'ul. Chałupnicza 30A',
+    website: 'https://studiofigurawroclaw.com/',
+    facebook: null,
+    instagram: null,
+    coordinates: { lat: 51.1106034, lng: 17.1268951 },
   },
   {
     id: 'wroclaw-zwycieska',
@@ -41,19 +54,7 @@ export const studios = [
     website: 'https://sfwroclawzwycieska.pl/',
     facebook: null,
     instagram: null,
-    coordinates: null,
-  },
-  {
-    id: 'wroclaw-szczepin',
-    published: true,
-    name: 'Studio Figura Wrocław Szczepin',
-    city: 'Wrocław',
-    district: 'Szczepin',
-    street: 'ul. Michalczyka 3C',
-    website: 'https://studiofigurawroclaw.pl/',
-    facebook: null,
-    instagram: null,
-    coordinates: null,
+    coordinates: { lat: 51.0592934, lng: 17.0126415 },
   },
   {
     id: 'bielany-wroclawskie',
@@ -65,20 +66,19 @@ export const studios = [
     website: null,
     facebook: 'https://www.facebook.com/share/1EzaXjEp3B/?mibextid=wwXIfr',
     instagram: null,
-    coordinates: null,
+    coordinates: { lat: 51.034787, lng: 16.9626561 },
   },
   {
-    // Location 5 — details pending. Fill in verified data and set `published: true`.
-    id: 'studio-5',
-    published: false,
-    name: null,
-    city: null,
+    id: 'strzelin',
+    published: true,
+    name: 'Studio Figura Strzelin',
+    city: 'Strzelin',
     district: null,
-    street: null,
-    website: null,
+    street: 'ul. Fabryczna 25',
+    website: 'https://studiofigurastrzelin.pl/',
     facebook: null,
     instagram: null,
-    coordinates: null,
+    coordinates: { lat: 50.77828, lng: 17.06487 },
   },
 ]
 

@@ -11,7 +11,7 @@ fs.mkdirSync(outDir, { recursive: true })
 const options = {
   errorCorrectionLevel: 'H', // tolerant to print damage / small logo overlays
   margin: 4,
-  color: { dark: '#0f241b', light: '#ffffff' },
+  color: { dark: '#171717', light: '#ffffff' },
 }
 
 fs.writeFileSync(path.join(outDir, 'studio-figura-qr.svg'), await QRCode.toString(URL, { ...options, type: 'svg' }))

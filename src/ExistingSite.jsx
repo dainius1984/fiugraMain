@@ -15,7 +15,7 @@ export default function ExistingSite() {
     <MotionConfig reducedMotion="user">
       <a
         href="#studia"
-        className="sr-only z-[60] rounded-full bg-gold-400 px-5 py-3 text-forest-950 focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
+        className="sr-only z-[60] rounded-full bg-gold-400 px-5 py-3 text-ink-950 focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
       >
         Przejdź do listy studiów
       </a>
@@ -23,8 +23,8 @@ export default function ExistingSite() {
       <main id="top">
         <Hero studioCount={studios.length} />
         <StudioDirectory studios={studios} />
-        <BrandStatement studioCount={studios.length} places={places} />
         <StudioMap studios={studios} />
+        <BrandStatement studioCount={studios.length} places={places} />
       </main>
       <Footer studios={studios} />
     </MotionConfig>

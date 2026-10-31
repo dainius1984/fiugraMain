@@ -4,6 +4,9 @@ import { useMediaQuery } from '../lib/hooks'
 
 const MEDIA = typeof __HERO_MEDIA__ !== 'undefined' ? __HERO_MEDIA__ : {}
 
+/** True when real hero media exists for phones (otherwise the mobile hero stays text-only and compact). */
+export const hasMobileHeroMedia = Boolean(MEDIA.poster || MEDIA.videoMobile)
+
 /**
  * Cinematic hero background.
  * - Plays /videos/studio-figura-hero.mp4 when present (desktop only by default;
@@ -40,7 +43,7 @@ export default function HeroMedia() {
   }, [playVideo, src])
 
   return (
-    <div className="absolute inset-0 overflow-hidden bg-forest-950">
+    <div className="absolute inset-0 overflow-hidden bg-ivory-200">
       <HeroArtwork />
 
       {MEDIA.poster && (
@@ -78,34 +81,30 @@ export default function HeroMedia() {
   )
 }
 
-/** Built-in image fallback: layered light, arches and grain in brand colours. */
+/** Built-in image fallback: warm white light, champagne arches and a soft shadow play. */
 function HeroArtwork() {
   return (
-    <div aria-hidden="true" className="grain absolute inset-0">
-      <div className="absolute inset-0 bg-[radial-gradient(120%_90%_at_75%_20%,#2c5a45_0%,#163326_38%,#0a1912_78%)]" />
-      <div className="animate-drift absolute -right-[20%] -top-[25%] h-[85%] w-[80%] rounded-full bg-[radial-gradient(circle,rgba(236,220,184,0.32)_0%,rgba(201,169,110,0.12)_40%,transparent_70%)] blur-2xl" />
+    <div aria-hidden="true" className="absolute inset-0">
+      <div className="absolute inset-0 bg-[radial-gradient(110%_80%_at_70%_15%,#ffffff_0%,#f3efe7_45%,#e6dccb_100%)]" />
+      <div className="animate-drift absolute -right-[25%] -top-[20%] h-[80%] w-[90%] rounded-full bg-[radial-gradient(circle,rgba(232,221,200,0.9)_0%,rgba(182,151,92,0.18)_45%,transparent_70%)] blur-2xl" />
       <div
-        className="animate-drift absolute -bottom-[30%] -left-[15%] h-[70%] w-[60%] rounded-full bg-[radial-gradient(circle,rgba(44,90,69,0.7)_0%,transparent_70%)] blur-3xl"
+        className="animate-drift absolute -bottom-[25%] -left-[20%] h-[60%] w-[80%] rounded-full bg-[radial-gradient(circle,rgba(23,23,23,0.08)_0%,transparent_70%)] blur-3xl"
         style={{ animationDelay: '-9s' }}
       />
-      <div className="absolute inset-y-0 left-[38%] w-[28%] -skew-x-[18deg] bg-gradient-to-b from-ivory-100/[0.07] via-ivory-100/[0.03] to-transparent blur-xl" />
+      <div className="absolute inset-y-0 left-[30%] w-[30%] -skew-x-[16deg] bg-gradient-to-b from-white/70 via-white/20 to-transparent blur-2xl" />
 
-      <svg
-        viewBox="0 0 800 1000"
-        preserveAspectRatio="xMaxYMax slice"
-        className="absolute bottom-0 right-0 h-[92%] w-full opacity-70 md:w-[62%]"
-      >
-        {[0, 1, 2, 3, 4, 5].map((i) => {
-          const w = 260 + i * 92
-          const cx = 560
-          const top = 190 + i * 36
+      <svg viewBox="0 0 600 900" preserveAspectRatio="xMidYMax slice" className="absolute inset-0 h-full w-full">
+        {[0, 1, 2, 3, 4].map((i) => {
+          const w = 200 + i * 80
+          const cx = 300
+          const top = 240 + i * 34
           return (
             <path
               key={i}
-              d={`M ${cx - w / 2} 1000 V ${top + w / 2} A ${w / 2} ${w / 2} 0 0 1 ${cx + w / 2} ${top + w / 2} V 1000`}
+              d={`M ${cx - w / 2} 900 V ${top + w / 2} A ${w / 2} ${w / 2} 0 0 1 ${cx + w / 2} ${top + w / 2} V 900`}
               fill="none"
-              stroke="#c9a96e"
-              strokeOpacity={0.42 - i * 0.065}
+              stroke="#b6975c"
+              strokeOpacity={0.55 - i * 0.09}
               strokeWidth={i === 0 ? 1.4 : 0.9}
               vectorEffect="non-scaling-stroke"
             />

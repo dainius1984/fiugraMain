@@ -20,19 +20,10 @@ export function primaryLink(studio) {
   return null
 }
 
-/** Google Maps directions built from verified coordinates, or the studio's street address. */
+/** Google Maps directions to the studio's street address (clearer for visitors than raw coordinates). */
 export function directionsUrl(studio) {
-  const destination = studio.coordinates
-    ? `${studio.coordinates.lat},${studio.coordinates.lng}`
-    : `${fullAddress(studio)}, Polska`
+  const destination = `${fullAddress(studio)}, Polska`
   return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}`
-}
-
-export function mapEmbedUrl(studio) {
-  const q = studio.coordinates
-    ? `${studio.coordinates.lat},${studio.coordinates.lng}`
-    : `${fullAddress(studio)}, Polska`
-  return `https://www.google.com/maps?q=${encodeURIComponent(q)}&z=16&output=embed`
 }
 
 /** Polish plural: plural(3, ['studio', 'studia', 'studiów']) → 'studia'. */

@@ -5,11 +5,11 @@ import { useId } from 'react'
  * Abstract and clearly decorative — never presented as a photograph of a location.
  */
 const PALETTES = [
-  { from: '#24503c', via: '#163326', to: '#0a1912', glow: '#ecdcb8', line: '#c9a96e' }, // classic forest
-  { from: '#3a4a2c', via: '#22301c', to: '#11180d', glow: '#e9cf9a', line: '#d4b27a' }, // olive dusk
-  { from: '#1c3b3a', via: '#12282a', to: '#091516', glow: '#dfe3d2', line: '#bfa774' }, // deep teal-green
-  { from: '#4a5a46', via: '#2c3b2e', to: '#151f17', glow: '#f3e6c8', line: '#dcc28f' }, // sage
-  { from: '#3b2f22', via: '#22261b', to: '#0e140f', glow: '#f0d9ad', line: '#c9a96e' }, // bronze
+  { from: '#fbf9f5', via: '#f1ebdf', to: '#e4d9c5', glow: '#ffffff', line: '#b6975c' }, // pearl
+  { from: '#f7f1e6', via: '#ecdfc7', to: '#dcc7a2', glow: '#fffaf0', line: '#a2844d' }, // champagne
+  { from: '#f6f4f1', via: '#e9e5df', to: '#d6d0c7', glow: '#ffffff', line: '#9c8a6a' }, // stone
+  { from: '#faf5f0', via: '#f0e4da', to: '#e2cfc0', glow: '#fffaf6', line: '#b08d5f' }, // blush sand
+  { from: '#f8f6f0', via: '#ebe6d8', to: '#d9d1bb', glow: '#ffffff', line: '#a89058' }, // linen
 ]
 
 function Arches({ c }) {
@@ -124,7 +124,7 @@ export default function StudioArt({ variant = 0, className = '' }) {
           <stop offset="1" stopColor={c.to} />
         </linearGradient>
         <radialGradient id={`glow-${uid}`} cx="0.72" cy="0.3" r="0.6">
-          <stop offset="0" stopColor={c.glow} stopOpacity="0.3" />
+          <stop offset="0" stopColor={c.glow} stopOpacity="0.9" />
           <stop offset="1" stopColor={c.glow} stopOpacity="0" />
         </radialGradient>
       </defs>

@@ -1,148 +1,253 @@
-import { useEffect, useState } from 'react'
-import { AnimatePresence, motion } from 'motion/react'
-import { ArrowUpRight, MapPinned } from 'lucide-react'
-import ArchArt from './ArchArt'
-import Reveal, { EASE } from './Reveal'
-import { directionsUrl, fullAddress, mapEmbedUrl } from '../lib/studio-utils'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useReducedMotion } from 'motion/react'
+import { Maximize2 } from 'lucide-react'
+import Reveal from './Reveal'
+import { directionsUrl, fullAddress, primaryLink } from '../lib/studio-utils'
 
-const CONSENT_KEY = 'sf-map-consent'
+// Extra top padding leaves room for the pins above their coordinates.
+const FIT = { paddingTopLeft: [28, 56], paddingBottomRight: [28, 24] }
+
+const escapeHtml = (text) =>
+  String(text).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
+
+function popupHtml(studio) {
+  const primary = primaryLink(studio)
+  return `
+    <div class="sf-popup">
+      <p class="sf-popup__name">${escapeHtml(studio.name)}</p>
+      <p class="sf-popup__address">${escapeHtml(fullAddress(studio))}</p>
+      <div class="sf-popup__actions">
+        <a href="${escapeHtml(primary.href)}" target="_blank" rel="noopener noreferrer" class="sf-popup__primary">${escapeHtml(primary.label)}</a>
+        <a href="${escapeHtml(directionsUrl(studio))}" target="_blank" rel="noopener noreferrer" class="sf-popup__secondary">Wyznacz trasę</a>
+      </div>
+    </div>`
+}
 
 /**
- * Interactive Google map. Uses verified `coordinates` when present in studios.js,
- * otherwise the studio's street address. The third-party iframe loads only
- * after the visitor opts in (privacy + performance).
+ * Overview map of every studio (Leaflet + OpenStreetMap, no API key).
+ * Leaflet is loaded lazily when the section approaches the viewport.
+ * Markers use the verified `coordinates` from studios.js.
  */
 export default function StudioMap({ studios }) {
-  const [activeId, setActiveId] = useState(studios[0]?.id)
-  const [consent, setConsent] = useState(false)
-  const active = studios.find((s) => s.id === activeId) ?? studios[0]
+  const located = studios.filter((s) => s.coordinates)
+  const sectionRef = useRef(null)
+  const mapEl = useRef(null)
+  const mapRef = useRef(null)
+  const markersRef = useRef({})
+  const boundsRef = useRef(null)
+  const [activeId, setActiveId] = useState(null)
+  const [ready, setReady] = useState(false)
+  const [touchLocked, setTouchLocked] = useState(false)
+  const reduceMotion = useReducedMotion()
 
+  // Load Leaflet only when the map is about to be seen.
   useEffect(() => {
-    try {
-      setConsent(localStorage.getItem(CONSENT_KEY) === '1')
-    } catch {
-      /* storage unavailable — ask again */
+    const section = sectionRef.current
+    if (!section || located.length === 0) return
+    let cancelled = false
+
+    const init = async () => {
+      const [{ default: L }] = await Promise.all([import('leaflet'), import('leaflet/dist/leaflet.css')])
+      if (cancelled || !mapEl.current || mapRef.current) return
+
+      const isTouch = window.matchMedia('(pointer: coarse)').matches
+      const map = L.map(mapEl.current, {
+        scrollWheelZoom: false, // never hijack page scrolling
+        dragging: !isTouch, // on phones: tap the map first, then drag
+        zoomControl: false,
+      })
+      L.control.zoom({ position: 'bottomright', zoomInTitle: 'Przybliż', zoomOutTitle: 'Oddal' }).addTo(map)
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      }).addTo(map)
+
+      located.forEach((studio, i) => {
+        const icon = L.divIcon({
+          className: 'sf-marker',
+          html: `<span class="sf-pin"><span>${i + 1}</span></span>`,
+          iconSize: [36, 40],
+          iconAnchor: [18, 36], // the rotated square's tip
+          popupAnchor: [0, -36],
+        })
+        const marker = L.marker([studio.coordinates.lat, studio.coordinates.lng], {
+          icon,
+          title: studio.name,
+          alt: studio.name,
+          riseOnHover: true,
+        })
+          .bindPopup(popupHtml(studio), { className: 'sf-leaflet-popup', maxWidth: 280 })
+          .addTo(map)
+        marker.on('popupopen', () => setActiveId(studio.id))
+        marker.on('popupclose', () => setActiveId((id) => (id === studio.id ? null : id)))
+        markersRef.current[studio.id] = marker
+      })
+
+      boundsRef.current = L.latLngBounds(located.map((s) => [s.coordinates.lat, s.coordinates.lng]))
+      map.fitBounds(boundsRef.current, FIT)
+
+      map.on('focus click', () => map.scrollWheelZoom.enable())
+      map.on('blur mouseout', () => map.scrollWheelZoom.disable())
+      if (isTouch) {
+        setTouchLocked(true)
+        map.once('click', () => {
+          map.dragging.enable()
+          setTouchLocked(false)
+        })
+      }
+
+      mapRef.current = map
+      setReady(true)
     }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          observer.disconnect()
+          init()
+        }
+      },
+      { rootMargin: '600px 0px' }
+    )
+    observer.observe(section)
+
+    return () => {
+      cancelled = true
+      observer.disconnect()
+      mapRef.current?.remove()
+      mapRef.current = null
+      markersRef.current = {}
+    }
+    // Studios are static data; initialise once.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const allow = () => {
-    setConsent(true)
-    try {
-      localStorage.setItem(CONSENT_KEY, '1')
-    } catch {
-      /* ignore */
+  // Keep the active marker visually highlighted.
+  useEffect(() => {
+    for (const [id, marker] of Object.entries(markersRef.current)) {
+      marker.getElement()?.classList.toggle('is-active', id === activeId)
     }
+  }, [activeId, ready])
+
+  const focusStudio = useCallback(
+    (studio) => {
+      const map = mapRef.current
+      const marker = markersRef.current[studio.id]
+      if (!map || !marker) return
+      if (window.matchMedia('(max-width: 1023px)').matches) {
+        mapEl.current?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' })
+      }
+      const target = [studio.coordinates.lat, studio.coordinates.lng]
+      map.closePopup()
+      map.once('moveend', () => marker.openPopup())
+      if (reduceMotion) map.setView(target, 15, { animate: false })
+      else map.flyTo(target, 15, { duration: 1.2 })
+      setActiveId(studio.id)
+    },
+    [reduceMotion]
+  )
+
+  const showAll = () => {
+    const map = mapRef.current
+    if (!map || !boundsRef.current) return
+    map.closePopup()
+    if (reduceMotion) map.fitBounds(boundsRef.current, { ...FIT, animate: false })
+    else map.flyToBounds(boundsRef.current, { ...FIT, duration: 1.1 })
+    setActiveId(null)
   }
 
-  if (!active) return null
+  if (located.length === 0) return null
 
   return (
-    <section id="mapa" aria-labelledby="mapa-heading" className="bg-ivory-200/60 py-16 md:py-32">
+    <section
+      ref={sectionRef}
+      id="mapa"
+      aria-labelledby="mapa-heading"
+      className="border-t border-gold-300/50 bg-ivory-50 py-16 md:py-28"
+    >
       <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-12">
-        <Reveal as="p" className="eyebrow mb-4 flex items-center gap-4 text-gold-600">
-          <span aria-hidden="true" className="h-px w-10 bg-gold-500/60" />
-          Mapa
-        </Reveal>
-        <Reveal delay={0.08}>
-          <h2 id="mapa-heading" className="font-serif text-[2.6rem] leading-[1] text-forest-900 sm:text-6xl">
-            Studio blisko <em className="text-gold-600">Ciebie</em>
-          </h2>
-        </Reveal>
+        <div className="mx-auto max-w-2xl text-center">
+          <Reveal>
+            <h2 id="mapa-heading" className="font-serif text-[2.4rem] leading-[1.02] text-ink-900 sm:text-6xl">
+              Znajdź nas <em className="text-gold-600">na mapie</em>
+            </h2>
+          </Reveal>
+          <Reveal delay={0.1}>
+            <p className="mx-auto mt-4 max-w-md text-[1.05rem] leading-relaxed text-ink-600 md:mt-6 md:text-lg">
+              Pięć lokalizacji. Wybierz tę, do której masz najbliżej.
+            </p>
+          </Reveal>
+        </div>
 
-        <div className="mt-10 grid gap-6 md:mt-14 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-10">
-          <Reveal delay={0.12}>
-            <ul className="divide-y divide-forest-900/10 border-y border-forest-900/10" aria-label="Wybierz studio na mapie">
-              {studios.map((studio, i) => {
-                const isActive = studio.id === active.id
+        <div className="mt-10 grid gap-6 md:mt-14 lg:grid-cols-[minmax(0,4fr)_minmax(0,8fr)] lg:gap-10">
+          <Reveal delay={0.12} className="order-2 lg:order-1">
+            <ol className="divide-y divide-gold-300/50 border-y border-gold-300/50" aria-label="Lokalizacje na mapie">
+              {located.map((studio, i) => {
+                const isActive = studio.id === activeId
                 return (
                   <li key={studio.id}>
                     <button
                       type="button"
-                      onClick={() => setActiveId(studio.id)}
+                      onClick={() => focusStudio(studio)}
                       aria-pressed={isActive}
-                      className="group flex min-h-18 w-full items-center gap-5 py-4 text-left"
+                      className="group flex min-h-16 w-full items-center gap-4 py-3.5 text-left"
                     >
                       <span
-                        className={`font-serif text-sm italic transition-colors duration-500 ${
-                          isActive ? 'text-gold-600' : 'text-forest-800/40'
+                        aria-hidden="true"
+                        className={`grid size-8 shrink-0 place-items-center rounded-full border text-xs font-semibold transition-colors duration-500 ease-luxe ${
+                          isActive
+                            ? 'border-gold-400 bg-gold-400 text-ink-900'
+                            : 'border-ink-900 bg-ink-900 text-gold-300 group-hover:border-gold-400'
                         }`}
                       >
-                        {String(i + 1).padStart(2, '0')}
+                        {i + 1}
                       </span>
                       <span className="flex-1">
-                        <span
-                          className={`block font-serif text-2xl leading-tight transition-colors duration-500 ${
-                            isActive ? 'text-forest-900' : 'text-forest-800/60 group-hover:text-forest-900'
-                          }`}
-                        >
+                        <span className="block font-serif text-[1.35rem] leading-tight text-ink-900">
                           {studio.name.replace(/^Studio Figura\s*/, '')}
                         </span>
-                        <span className="mt-0.5 block text-sm text-forest-800/60">{fullAddress(studio)}</span>
+                        <span className="mt-0.5 block text-sm text-ink-600">{fullAddress(studio)}</span>
                       </span>
                       <span
                         aria-hidden="true"
-                        className={`size-2 rotate-45 transition-all duration-500 ease-luxe ${
-                          isActive ? 'scale-100 bg-gold-500' : 'scale-0 bg-forest-900'
+                        className={`h-px bg-gold-400 transition-[width] duration-700 ease-luxe ${
+                          isActive ? 'w-8' : 'w-0 group-hover:w-5'
                         }`}
                       />
                     </button>
                   </li>
                 )
               })}
-            </ul>
-            <a
-              href={directionsUrl(active)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group mt-6 inline-flex min-h-12 items-center gap-2 text-[0.8rem] font-semibold uppercase tracking-[0.16em] text-forest-900"
+            </ol>
+            <button
+              type="button"
+              onClick={showAll}
+              className="group mt-5 inline-flex min-h-12 items-center gap-2 text-[0.75rem] font-semibold uppercase tracking-[0.18em] text-ink-900"
             >
-              <span className="border-b border-gold-500/60 pb-1 transition-colors duration-500 group-hover:border-forest-900">
-                Wyznacz trasę: {active.name.replace(/^Studio Figura\s*/, '')}
+              <Maximize2 className="size-4 text-gold-500" strokeWidth={1.75} aria-hidden="true" />
+              <span className="border-b border-gold-400/60 pb-0.5 transition-colors duration-500 group-hover:border-ink-900">
+                Pokaż wszystkie studia
               </span>
-              <ArrowUpRight className="size-4 transition-transform duration-500 ease-luxe group-hover:-translate-y-0.5 group-hover:translate-x-0.5" strokeWidth={1.75} />
-              <span className="sr-only">(otwiera Mapy Google w nowej karcie)</span>
-            </a>
+            </button>
           </Reveal>
 
-          <Reveal delay={0.18}>
-            <div className="relative aspect-[4/3] overflow-hidden rounded-[1.75rem] bg-forest-900 ring-1 ring-forest-900/10 lg:aspect-auto lg:h-full lg:min-h-[460px]">
-              {consent ? (
-                <AnimatePresence mode="wait">
-                  <motion.iframe
-                    key={active.id}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.6, ease: EASE }}
-                    title={`Mapa: ${active.name}, ${fullAddress(active)}`}
-                    src={mapEmbedUrl(active)}
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                    className="absolute inset-0 h-full w-full border-0 grayscale-[35%] sepia-[12%]"
-                    allowFullScreen
-                  />
-                </AnimatePresence>
-              ) : (
-                <div className="absolute inset-0">
-                  <ArchArt variant={2} className="absolute inset-0 h-full w-full" />
-                  <div className="absolute inset-0 bg-forest-950/40" />
-                  <div className="relative flex h-full flex-col items-center justify-center px-6 text-center text-ivory-100">
-                    <MapPinned className="size-8 text-gold-300" strokeWidth={1.25} aria-hidden="true" />
-                    <p className="mt-4 font-serif text-2xl sm:text-3xl">{active.name}</p>
-                    <p className="mt-1 text-sm text-ivory-100/70">{fullAddress(active)}</p>
-                    <button
-                      type="button"
-                      onClick={allow}
-                      className="mt-6 inline-flex min-h-12 items-center rounded-full bg-gold-400 px-6 text-[0.8rem] font-semibold uppercase tracking-[0.16em] text-forest-950 transition-colors duration-500 hover:bg-gold-200"
-                    >
-                      Pokaż mapę
-                    </button>
-                    <p className="mt-4 max-w-xs text-xs leading-relaxed text-ivory-100/55">
-                      Mapa jest dostarczana przez Google. Po jej wczytaniu Google może przetwarzać dane
-                      i zapisywać pliki cookie.
-                    </p>
-                  </div>
+          <Reveal delay={0.18} className="order-1 lg:order-2">
+            <div className="relative isolate overflow-hidden rounded-[1.5rem] ring-1 ring-gold-300/60">
+              <div
+                ref={mapEl}
+                role="region"
+                aria-label="Mapa lokalizacji Studio Figura"
+                className="sf-map h-[520px] w-full bg-ivory-200 lg:h-[600px]"
+              />
+              {!ready && (
+                <div className="pointer-events-none absolute inset-0 grid place-items-center text-sm text-ink-600">
+                  Ładowanie mapy…
                 </div>
+              )}
+              {touchLocked && (
+                <p className="pointer-events-none absolute inset-x-0 top-3 z-[500] mx-auto w-max rounded-full bg-ink-900/80 px-4 py-2 text-xs text-ivory-50 backdrop-blur">
+                  Dotknij mapy, aby ją przesuwać
+                </p>
               )}
             </div>
           </Reveal>

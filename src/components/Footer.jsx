@@ -6,16 +6,16 @@ import { fullAddress, primaryLink } from '../lib/studio-utils'
 export default function Footer({ studios }) {
   const year = new Date().getFullYear()
   return (
-    <footer className="bg-forest-950 text-ivory-100">
+    <footer className="bg-ink-950 text-ivory-100">
       <div className="mx-auto max-w-7xl px-5 pb-10 pt-16 sm:px-8 md:pt-24 lg:px-12">
         <div className="grid gap-12 md:grid-cols-[1.2fr_2fr]">
           <div>
             <Wordmark className="text-xl md:text-2xl" />
-            <p className="mt-5 font-serif text-2xl italic text-gold-200/90">Twoje piękno. Twoje miejsce.</p>
+            <p className="mt-5 font-serif text-2xl italic text-gold-300">Twoje piękno. Twoje miejsce.</p>
           </div>
 
           <nav aria-label="Studia Studio Figura">
-            <p className="eyebrow mb-5 text-gold-300/80">Studia</p>
+            <p className="eyebrow mb-5 text-gold-300">Studia</p>
             <ul className="grid gap-x-8 gap-y-1 sm:grid-cols-2">
               {studios.map((studio) => (
                 <li key={studio.id}>
@@ -29,7 +29,7 @@ export default function Footer({ studios }) {
                       <span className="block text-ivory-50 transition-colors duration-500 group-hover:text-gold-200">
                         {studio.name}
                       </span>
-                      <span className="block text-sm text-ivory-100/50">{fullAddress(studio)}</span>
+                      <span className="block text-sm text-ivory-100/55">{fullAddress(studio)}</span>
                     </span>
                     <ArrowUpRight
                       aria-hidden="true"
@@ -44,7 +44,7 @@ export default function Footer({ studios }) {
           </nav>
         </div>
 
-        <div className="mt-16 flex flex-col gap-3 border-t border-ivory-100/10 pt-6 text-xs text-ivory-100/45 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-16 flex flex-col gap-3 border-t border-ivory-100/10 pt-6 text-xs text-ivory-100/50 sm:flex-row sm:items-center sm:justify-between">
           <p>© {year} {site.brand}</p>
           <a href={site.url} className="tracking-[0.18em] uppercase transition-colors hover:text-gold-200">
             {site.domainLabel}
