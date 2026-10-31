@@ -104,10 +104,18 @@ The *Znajdź nas na mapie* section shows all studios on one map, built with
 
 ## Visual identity
 
-The palette follows the client's white, black and champagne-gold branding. Tokens live in `src/index.css`:
-`ivory-*` (warm whites, background `#FAF8F4`, surfaces `#FFFFFF`), `ink-*` (charcoal text `#171717`,
-secondary `#66615B`, dark `#141414`) and `gold-*` (`#B6975C`, light `#E8DDC8`; use `gold-600` for gold text).
-Black is reserved for buttons, map markers and the footer.
+The palette matches the client's promotional banner: white, black and Studio Figura orange.
+Every colour is a token in `src/index.css` (`@theme static`, so tokens used only from inline SVG styles are emitted too):
+
+- `ivory-*`: warm whites (background `#F8F4EF`, surfaces `#FFFFFF`).
+- `ink-*`: black and charcoal (text `#171717`, muted `#716B66`, dark `#141414`).
+- `brand-*`: orange.
+  - `brand-400` **`#E05A22`** is the signature orange for lines, icons, large display type and map markers.
+  - `brand-600` `#B4441A` is for small orange text on light backgrounds and for fills behind white text (WCAG AA).
+  - `brand-50`…`brand-300` are light tints for hairlines, hover washes and illustration line work.
+
+Orange stays an accent and never fills whole sections. Black is reserved for buttons, map markers and the footer.
+The favicon (`public/favicon.svg`) is a static file, so it repeats `#E05A22` directly.
 
 ## Domain, redirects and QR codes
 

@@ -28,7 +28,7 @@ export default function Navigation() {
       transition={{ duration: 0.7, ease: EASE }}
       className={`fixed inset-x-0 top-0 z-50 transition-[background-color,color,box-shadow,backdrop-filter] duration-700 ease-luxe ${
         scrolled
-          ? 'bg-ivory-100/85 text-ink-900 shadow-[0_1px_0_rgba(182,151,92,0.25)] backdrop-blur-xl'
+          ? 'bg-ivory-100/85 text-ink-900 shadow-[0_1px_0_var(--color-brand-200)] backdrop-blur-xl'
           : 'bg-transparent text-ink-900'
       }`}
     >
@@ -48,7 +48,7 @@ export default function Navigation() {
                 className="group relative py-2 text-[0.75rem] font-medium uppercase tracking-[0.22em] opacity-80 transition-opacity duration-500 hover:opacity-100"
               >
                 {link.label}
-                <span className="absolute -bottom-0.5 left-0 h-px w-full origin-right scale-x-0 bg-gold-400 transition-transform duration-500 ease-luxe group-hover:origin-left group-hover:scale-x-100" />
+                <span className="absolute -bottom-0.5 left-0 h-px w-full origin-right scale-x-0 bg-brand-400 transition-transform duration-500 ease-luxe group-hover:origin-left group-hover:scale-x-100" />
               </a>
             </li>
           ))}
@@ -56,7 +56,7 @@ export default function Navigation() {
 
         <a
           href="#studia"
-          className="inline-flex min-h-11 items-center rounded-full bg-ink-900 px-5 text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-ivory-50 transition-colors duration-500 ease-luxe hover:bg-gold-400 hover:text-ink-900"
+          className="inline-flex min-h-11 items-center rounded-full bg-ink-900 px-5 text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-ivory-50 transition-colors duration-500 ease-luxe hover:bg-brand-600"
         >
           <span className="md:hidden">Studia</span>
           <span className="hidden md:inline">Znajdź studio</span>

@@ -163,13 +163,13 @@ export default function StudioMap({ studios }) {
       ref={sectionRef}
       id="mapa"
       aria-labelledby="mapa-heading"
-      className="border-t border-gold-300/50 bg-ivory-50 py-16 md:py-28"
+      className="border-t border-brand-300/50 bg-ivory-50 py-16 md:py-28"
     >
       <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-12">
         <div className="mx-auto max-w-2xl text-center">
           <Reveal>
             <h2 id="mapa-heading" className="font-serif text-[2.4rem] leading-[1.02] text-ink-900 sm:text-6xl">
-              Znajdź nas <em className="text-gold-600">na mapie</em>
+              Znajdź nas <em className="text-brand-400">na mapie</em>
             </h2>
           </Reveal>
           <Reveal delay={0.1}>
@@ -181,7 +181,7 @@ export default function StudioMap({ studios }) {
 
         <div className="mt-10 grid gap-6 md:mt-14 lg:grid-cols-[minmax(0,4fr)_minmax(0,8fr)] lg:gap-10">
           <Reveal delay={0.12} className="order-2 lg:order-1">
-            <ol className="divide-y divide-gold-300/50 border-y border-gold-300/50" aria-label="Lokalizacje na mapie">
+            <ol className="divide-y divide-brand-300/50 border-y border-brand-300/50" aria-label="Lokalizacje na mapie">
               {located.map((studio, i) => {
                 const isActive = studio.id === activeId
                 return (
@@ -196,8 +196,8 @@ export default function StudioMap({ studios }) {
                         aria-hidden="true"
                         className={`grid size-8 shrink-0 place-items-center rounded-full border text-xs font-semibold transition-colors duration-500 ease-luxe ${
                           isActive
-                            ? 'border-gold-400 bg-gold-400 text-ink-900'
-                            : 'border-ink-900 bg-ink-900 text-gold-300 group-hover:border-gold-400'
+                            ? 'border-brand-400 bg-brand-400 text-ink-900'
+                            : 'border-ink-900 bg-ink-900 text-brand-400 group-hover:border-brand-400'
                         }`}
                       >
                         {i + 1}
@@ -210,7 +210,7 @@ export default function StudioMap({ studios }) {
                       </span>
                       <span
                         aria-hidden="true"
-                        className={`h-px bg-gold-400 transition-[width] duration-700 ease-luxe ${
+                        className={`h-px bg-brand-400 transition-[width] duration-700 ease-luxe ${
                           isActive ? 'w-8' : 'w-0 group-hover:w-5'
                         }`}
                       />
@@ -224,15 +224,15 @@ export default function StudioMap({ studios }) {
               onClick={showAll}
               className="group mt-5 inline-flex min-h-12 items-center gap-2 text-[0.75rem] font-semibold uppercase tracking-[0.18em] text-ink-900"
             >
-              <Maximize2 className="size-4 text-gold-500" strokeWidth={1.75} aria-hidden="true" />
-              <span className="border-b border-gold-400/60 pb-0.5 transition-colors duration-500 group-hover:border-ink-900">
+              <Maximize2 className="size-4 text-brand-400" strokeWidth={1.75} aria-hidden="true" />
+              <span className="border-b border-brand-400/60 pb-0.5 transition-colors duration-500 group-hover:border-ink-900">
                 Pokaż wszystkie studia
               </span>
             </button>
           </Reveal>
 
           <Reveal delay={0.18} className="order-1 lg:order-2">
-            <div className="relative isolate overflow-hidden rounded-[1.5rem] ring-1 ring-gold-300/60">
+            <div className="relative isolate overflow-hidden rounded-[1.5rem] ring-1 ring-brand-300/60">
               <div
                 ref={mapEl}
                 role="region"

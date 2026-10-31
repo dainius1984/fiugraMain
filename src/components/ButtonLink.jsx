@@ -4,15 +4,15 @@ const base =
   'group/btn relative isolate inline-flex min-h-14 items-center justify-center gap-2.5 overflow-hidden rounded-full px-6 text-[0.8rem] font-semibold uppercase tracking-[0.16em] transition-colors duration-500 ease-luxe'
 
 const variants = {
-  gold: 'bg-gold-400 text-ink-900 hover:text-ink-900',
-  ink: 'bg-ink-900 text-ivory-50 hover:text-ink-900',
-  outline: 'border border-gold-400/55 text-ink-900 hover:border-ink-900 hover:text-ivory-50',
+  brand: 'bg-brand-600 text-ivory-50 hover:text-ivory-50',
+  ink: 'bg-ink-900 text-ivory-50 hover:text-ivory-50',
+  outline: 'border border-brand-300 text-ink-900 hover:border-ink-900 hover:text-ivory-50',
   'outline-light': 'border border-ivory-100/30 text-ivory-100 hover:border-ivory-100 hover:text-ink-900',
 }
 
 const sweep = {
-  gold: 'bg-gold-200',
-  ink: 'bg-gold-300',
+  brand: 'bg-ink-900',
+  ink: 'bg-brand-600',
   outline: 'bg-ink-900',
   'outline-light': 'bg-ivory-100',
 }

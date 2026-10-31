@@ -7,7 +7,7 @@ import { plural } from '../lib/studio-utils'
 
 const LINES = [
   { words: ['Twoje', 'piękno.'], className: 'text-ink-900' },
-  { words: ['Twoje', 'miejsce.'], className: 'italic text-gold-500' },
+  { words: ['Twoje', 'miejsce.'], className: 'italic text-brand-400' },
 ]
 
 export default function Hero({ studioCount }) {
@@ -33,7 +33,7 @@ export default function Hero({ studioCount }) {
         className="absolute -left-24 -top-10 -z-10 h-[420px] w-[420px] opacity-60 md:-left-40 md:h-[640px] md:w-[640px]"
       >
         {[0, 1, 2].map((i) => (
-          <circle key={i} cx="200" cy="200" r={110 + i * 42} fill="none" stroke="#b6975c" strokeOpacity={0.28 - i * 0.07} strokeWidth="0.8" />
+          <circle key={i} cx="200" cy="200" r={110 + i * 42} fill="none" className="stroke-brand-300" strokeOpacity={0.28 - i * 0.07} strokeWidth="0.8" />
         ))}
       </svg>
 
@@ -43,9 +43,9 @@ export default function Hero({ studioCount }) {
             initial={{ opacity: 0, letterSpacing: '0.6em' }}
             animate={{ opacity: 1, letterSpacing: '0.38em' }}
             transition={{ duration: 1.6, ease: EASE, delay: 0.2 }}
-            className="eyebrow mb-5 flex items-center gap-4 text-gold-600 md:mb-7"
+            className="eyebrow mb-5 flex items-center gap-4 text-brand-600 md:mb-7"
           >
-            <span aria-hidden="true" className="h-px w-10 bg-gold-400" />
+            <span aria-hidden="true" className="h-px w-10 bg-brand-400" />
             Studio Figura
           </motion.p>
 
@@ -93,14 +93,14 @@ export default function Hero({ studioCount }) {
             <motion.a
               href="#studia"
               whileTap={{ scale: 0.97 }}
-              className="group relative isolate inline-flex min-h-14 items-center justify-between gap-6 overflow-hidden rounded-full bg-ink-900 py-2 pl-7 pr-2 text-[0.8rem] font-semibold uppercase tracking-[0.18em] text-ivory-50 transition-colors duration-500 ease-luxe hover:text-ink-900 sm:justify-start"
+              className="group relative isolate inline-flex min-h-14 items-center justify-between gap-6 overflow-hidden rounded-full bg-ink-900 py-2 pl-7 pr-2 text-[0.8rem] font-semibold uppercase tracking-[0.18em] text-ivory-50 transition-colors duration-500 ease-luxe sm:justify-start"
             >
               <span
                 aria-hidden="true"
-                className="absolute inset-0 -z-10 origin-left scale-x-0 bg-gold-200 transition-transform duration-500 ease-luxe group-hover:scale-x-100"
+                className="absolute inset-0 -z-10 origin-left scale-x-0 bg-brand-600 transition-transform duration-500 ease-luxe group-hover:scale-x-100"
               />
               Znajdź swoje studio
-              <span className="grid size-10 place-items-center rounded-full bg-gold-400 text-ink-900 transition-transform duration-500 ease-luxe group-hover:translate-y-0.5">
+              <span className="grid size-10 place-items-center rounded-full bg-brand-400 text-ivory-50 transition-[transform,background-color,color] duration-500 ease-luxe group-hover:translate-y-0.5 group-hover:bg-ivory-50 group-hover:text-brand-600">
                 <ArrowDown className="size-4" strokeWidth={1.75} />
               </span>
             </motion.a>
@@ -118,7 +118,7 @@ export default function Hero({ studioCount }) {
           transition={{ duration: 1.6, ease: EASE, delay: 0.3 }}
           className={`relative md:col-span-5 ${hasMobileHeroMedia ? '' : 'hidden md:block'}`}
         >
-          <div className="relative mx-auto aspect-[4/3] w-full overflow-hidden rounded-t-[999px] rounded-b-[1.5rem] ring-1 ring-gold-300/60 md:aspect-[4/5] md:max-w-[460px]">
+          <div className="relative mx-auto aspect-[4/3] w-full overflow-hidden rounded-t-[999px] rounded-b-[1.5rem] ring-1 ring-brand-300/60 md:aspect-[4/5] md:max-w-[460px]">
             <motion.div
               className="absolute inset-0 will-change-transform"
               style={reduceMotion ? undefined : { y: mediaY, scale: mediaScale }}
@@ -129,10 +129,10 @@ export default function Hero({ studioCount }) {
               <HeroMedia />
             </motion.div>
           </div>
-          {/* Offset gold outline for an editorial, layered feel */}
+          {/* Offset orange hairline for an editorial, layered feel */}
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 -z-10 mx-auto hidden translate-x-4 translate-y-4 rounded-t-[999px] rounded-b-[1.5rem] border border-gold-400/40 md:block md:max-w-[460px]"
+            className="pointer-events-none absolute inset-0 -z-10 mx-auto hidden translate-x-4 translate-y-4 rounded-t-[999px] rounded-b-[1.5rem] border border-brand-300/70 md:block md:max-w-[460px]"
           />
         </motion.div>
       </div>

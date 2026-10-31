@@ -24,7 +24,7 @@ export default function StudioCard({ studio, index, className = '' }) {
     <motion.article
       variants={cardVariants}
       aria-labelledby={headingId}
-      className={`group/card relative flex flex-col overflow-hidden rounded-[1.5rem] bg-ivory-50 shadow-[0_24px_50px_-36px_rgba(23,23,23,0.28)] ring-1 ring-gold-300/45 transition-[box-shadow,transform] duration-700 ease-luxe hover:shadow-[0_36px_70px_-40px_rgba(23,23,23,0.38)] hover:ring-gold-400/70 md:hover:-translate-y-1 ${className}`}
+      className={`group/card relative flex flex-col overflow-hidden rounded-[1.5rem] bg-ivory-50 shadow-[0_24px_50px_-36px_rgba(23,23,23,0.28)] ring-1 ring-brand-300/45 transition-[box-shadow,transform] duration-700 ease-luxe hover:shadow-[0_36px_70px_-40px_rgba(23,23,23,0.38)] hover:ring-brand-400/70 md:hover:-translate-y-1 ${className}`}
     >
       {/* Visual — photo when supplied, otherwise distinct illustrative artwork */}
       <a
@@ -53,7 +53,7 @@ export default function StudioCard({ studio, index, className = '' }) {
         {image && <div className="absolute inset-0 bg-gradient-to-t from-ink-950/70 via-ink-950/10 to-transparent" />}
         <div className="absolute inset-x-6 bottom-5 sm:inset-x-7 sm:bottom-6">
           {studio.district && (
-            <span className={`eyebrow block text-[0.65rem] ${image ? 'text-gold-200' : 'text-gold-600'}`}>{studio.city}</span>
+            <span className={`eyebrow block text-[0.65rem] ${image ? 'text-brand-200' : 'text-brand-600'}`}>{studio.city}</span>
           )}
           <span className={`mt-1 block font-serif text-[2.1rem] italic leading-none sm:text-[2.4rem] ${image ? 'text-ivory-50' : 'text-ink-900'}`}>
             {shortLabel(studio)}
@@ -61,13 +61,13 @@ export default function StudioCard({ studio, index, className = '' }) {
         </div>
       </a>
 
-      <span aria-hidden="true" className="h-px bg-gradient-to-r from-transparent via-gold-300/80 to-transparent" />
+      <span aria-hidden="true" className="h-px bg-gradient-to-r from-transparent via-brand-300/80 to-transparent" />
 
       <div className="flex flex-1 flex-col p-6 sm:p-7">
-        {/* Gold rule that extends on hover */}
+        {/* Orange rule that extends on hover */}
         <span
           aria-hidden="true"
-          className="mb-4 block h-px w-10 bg-gold-400 transition-[width] duration-700 ease-luxe group-hover/card:w-20"
+          className="mb-4 block h-px w-10 bg-brand-400 transition-[width] duration-700 ease-luxe group-hover/card:w-20"
         />
         <h3 id={headingId} className="font-serif text-[1.65rem] font-medium leading-[1.1] text-ink-900 sm:text-[1.75rem]">
           {studio.name}
@@ -75,7 +75,7 @@ export default function StudioCard({ studio, index, className = '' }) {
 
         <address className="mt-3 flex items-start gap-2.5 text-[1.05rem] not-italic leading-snug text-ink-800">
           <MapPin
-            className="mt-[0.2rem] size-[1.05rem] shrink-0 text-gold-500 transition-colors duration-700 group-hover/card:text-gold-600"
+            className="mt-[0.2rem] size-[1.05rem] shrink-0 text-brand-400 transition-colors duration-700 group-hover/card:text-brand-600"
             strokeWidth={1.75}
             aria-hidden="true"
           />

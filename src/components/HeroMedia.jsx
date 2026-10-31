@@ -81,14 +81,14 @@ export default function HeroMedia() {
   )
 }
 
-/** Built-in image fallback: warm white light, champagne arches and a soft shadow play. */
+/** Built-in image fallback: warm white light, soft orange arches and a gentle shadow play. */
 function HeroArtwork() {
   return (
     <div aria-hidden="true" className="absolute inset-0">
-      <div className="absolute inset-0 bg-[radial-gradient(110%_80%_at_70%_15%,#ffffff_0%,#f3efe7_45%,#e6dccb_100%)]" />
-      <div className="animate-drift absolute -right-[25%] -top-[20%] h-[80%] w-[90%] rounded-full bg-[radial-gradient(circle,rgba(232,221,200,0.9)_0%,rgba(182,151,92,0.18)_45%,transparent_70%)] blur-2xl" />
+      <div className="absolute inset-0 bg-[radial-gradient(110%_80%_at_70%_15%,var(--color-ivory-50)_0%,var(--color-ivory-200)_45%,var(--color-brand-100)_100%)]" />
+      <div className="animate-drift absolute -right-[25%] -top-[20%] h-[80%] w-[90%] rounded-full bg-[radial-gradient(circle,color-mix(in_srgb,var(--color-brand-100)_95%,transparent)_0%,color-mix(in_srgb,var(--color-brand-200)_45%,transparent)_45%,transparent_70%)] blur-2xl" />
       <div
-        className="animate-drift absolute -bottom-[25%] -left-[20%] h-[60%] w-[80%] rounded-full bg-[radial-gradient(circle,rgba(23,23,23,0.08)_0%,transparent_70%)] blur-3xl"
+        className="animate-drift absolute -bottom-[25%] -left-[20%] h-[60%] w-[80%] rounded-full bg-[radial-gradient(circle,color-mix(in_srgb,var(--color-ink-900)_7%,transparent)_0%,transparent_70%)] blur-3xl"
         style={{ animationDelay: '-9s' }}
       />
       <div className="absolute inset-y-0 left-[30%] w-[30%] -skew-x-[16deg] bg-gradient-to-b from-white/70 via-white/20 to-transparent blur-2xl" />
@@ -103,7 +103,7 @@ function HeroArtwork() {
               key={i}
               d={`M ${cx - w / 2} 900 V ${top + w / 2} A ${w / 2} ${w / 2} 0 0 1 ${cx + w / 2} ${top + w / 2} V 900`}
               fill="none"
-              stroke="#b6975c"
+              className="stroke-brand-300"
               strokeOpacity={0.55 - i * 0.09}
               strokeWidth={i === 0 ? 1.4 : 0.9}
               vectorEffect="non-scaling-stroke"

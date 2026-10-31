@@ -15,7 +15,7 @@ export default function ExistingSite() {
     <MotionConfig reducedMotion="user">
       <a
         href="#studia"
-        className="sr-only z-[60] rounded-full bg-gold-400 px-5 py-3 text-ink-950 focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
+        className="sr-only z-[60] rounded-full bg-brand-400 px-5 py-3 text-ink-950 focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
       >
         Przejdź do listy studiów
       </a>

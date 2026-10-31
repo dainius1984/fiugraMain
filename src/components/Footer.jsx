@@ -11,11 +11,11 @@ export default function Footer({ studios }) {
         <div className="grid gap-12 md:grid-cols-[1.2fr_2fr]">
           <div>
             <Wordmark className="text-xl md:text-2xl" />
-            <p className="mt-5 font-serif text-2xl italic text-gold-300">Twoje piękno. Twoje miejsce.</p>
+            <p className="mt-5 font-serif text-2xl italic text-brand-400">Twoje piękno. Twoje miejsce.</p>
           </div>
 
           <nav aria-label="Studia Studio Figura">
-            <p className="eyebrow mb-5 text-gold-300">Studia</p>
+            <p className="eyebrow mb-5 text-brand-400">Studia</p>
             <ul className="grid gap-x-8 gap-y-1 sm:grid-cols-2">
               {studios.map((studio) => (
                 <li key={studio.id}>
@@ -26,7 +26,7 @@ export default function Footer({ studios }) {
                     className="group flex min-h-14 items-center justify-between gap-4 border-b border-ivory-100/10 py-3"
                   >
                     <span>
-                      <span className="block text-ivory-50 transition-colors duration-500 group-hover:text-gold-200">
+                      <span className="block text-ivory-50 transition-colors duration-500 group-hover:text-brand-400">
                         {studio.name}
                       </span>
                       <span className="block text-sm text-ivory-100/55">{fullAddress(studio)}</span>
@@ -34,7 +34,7 @@ export default function Footer({ studios }) {
                     <ArrowUpRight
                       aria-hidden="true"
                       strokeWidth={1.5}
-                      className="size-4 shrink-0 text-gold-300/70 transition-transform duration-500 ease-luxe group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                      className="size-4 shrink-0 text-brand-400 transition-transform duration-500 ease-luxe group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
                     />
                     <span className="sr-only">(otwiera się w nowej karcie)</span>
                   </a>
@@ -46,7 +46,7 @@ export default function Footer({ studios }) {
 
         <div className="mt-16 flex flex-col gap-3 border-t border-ivory-100/10 pt-6 text-xs text-ivory-100/50 sm:flex-row sm:items-center sm:justify-between">
           <p>© {year} {site.brand}</p>
-          <a href={site.url} className="tracking-[0.18em] uppercase transition-colors hover:text-gold-200">
+          <a href={site.url} className="tracking-[0.18em] uppercase transition-colors hover:text-brand-400">
             {site.domainLabel}
           </a>
         </div>
