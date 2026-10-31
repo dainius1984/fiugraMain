@@ -1,0 +1,5 @@
+# Apache: wymuś HTTPS i www — 301 na https://www.lokalizacjesf.pl
+RewriteEngine On
+RewriteCond %{HTTPS} off [OR]
+RewriteCond %{HTTP_HOST} !^www\. [NC]
+RewriteRule ^(.*)$ https://www.lokalizacjesf.pl/$1 [L,R=301]

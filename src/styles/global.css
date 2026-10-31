@@ -1,0 +1,7 @@
+/* Tailwind Preflight supplies the modern reset and border-box sizing. */
+@import '../index.css';
+
+@layer base {
+  body { min-width: 20rem; min-height: 100svh; }
+  button, input, textarea, select { font: inherit; }
+}

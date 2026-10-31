@@ -1,0 +1,10 @@
+{
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "lokalizacjesf.pl" }],
+      "destination": "https://www.lokalizacjesf.pl/:path*",
+      "permanent": true
+    }
+  ]
+}
