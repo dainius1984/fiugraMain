@@ -1,7 +1,7 @@
 import { motion } from 'motion/react'
 
 const base =
-  'group/btn relative isolate inline-flex min-h-12 items-center justify-center gap-2.5 overflow-hidden rounded-full px-6 text-[0.8rem] font-semibold uppercase tracking-[0.16em] transition-colors duration-500 ease-luxe'
+  'group/btn relative isolate inline-flex min-h-14 items-center justify-center gap-2.5 overflow-hidden rounded-full px-6 text-[0.8rem] font-semibold uppercase tracking-[0.16em] transition-colors duration-500 ease-luxe'
 
 const variants = {
   gold: 'bg-gold-400 text-forest-950 hover:text-forest-950',
@@ -37,7 +37,7 @@ export default function ButtonLink({
     <motion.a
       href={href}
       whileTap={{ scale: 0.97 }}
-      className={`${base} ${variants[variant]} ${iconOnly ? 'aspect-square px-0 w-12' : ''} ${className}`}
+      className={`${base} ${variants[variant]} ${iconOnly ? 'aspect-square shrink-0 px-0 w-14' : ''} ${className}`}
       aria-label={label}
       {...externalProps}
       {...rest}

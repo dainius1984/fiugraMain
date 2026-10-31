@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { MotionConfig } from 'motion/react'
 import Navigation from './components/Navigation'
 import Hero from './components/Hero'
@@ -6,22 +6,10 @@ import StudioDirectory from './components/StudioDirectory'
 import BrandStatement from './components/BrandStatement'
 import StudioMap from './components/StudioMap'
 import Footer from './components/Footer'
-import { studios } from './data/studios'
+import { publishedStudios as studios } from './data/studios'
 
 export default function ExistingSite() {
-  const [query, setQuery] = useState('')
-  const [city, setCity] = useState(null)
-
-  const cities = useMemo(() => {
-    const counts = new Map()
-    for (const s of studios) counts.set(s.city, (counts.get(s.city) ?? 0) + 1)
-    return [...counts].map(([name, count]) => ({ city: name, count }))
-  }, [])
-
-  const pickCity = (name) => {
-    setQuery('')
-    setCity(name)
-  }
+  const places = useMemo(() => [...new Set(studios.map((s) => s.city))], [])
 
   return (
     <MotionConfig reducedMotion="user">
@@ -33,16 +21,9 @@ export default function ExistingSite() {
       </a>
       <Navigation />
       <main id="top">
-        <Hero cities={cities} onPickCity={pickCity} />
-        <StudioDirectory
-          studios={studios}
-          cities={cities}
-          query={query}
-          setQuery={setQuery}
-          city={city}
-          setCity={setCity}
-        />
-        <BrandStatement studioCount={studios.length} cityCount={cities.length} />
+        <Hero studioCount={studios.length} />
+        <StudioDirectory studios={studios} />
+        <BrandStatement studioCount={studios.length} places={places} />
         <StudioMap studios={studios} />
       </main>
       <Footer studios={studios} />

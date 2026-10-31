@@ -1,7 +1,7 @@
 import { ArrowUpRight } from 'lucide-react'
 import Wordmark from './Wordmark'
 import { site } from '../data/site'
-import { fullAddress } from '../lib/studio-utils'
+import { fullAddress, primaryLink } from '../lib/studio-utils'
 
 export default function Footer({ studios }) {
   const year = new Date().getFullYear()
@@ -20,7 +20,7 @@ export default function Footer({ studios }) {
               {studios.map((studio) => (
                 <li key={studio.id}>
                   <a
-                    href={studio.website}
+                    href={primaryLink(studio).href}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="group flex min-h-14 items-center justify-between gap-4 border-b border-ivory-100/10 py-3"

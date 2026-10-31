@@ -4,7 +4,7 @@
 
 Package name: `studio-figura-locations`. JavaScript/JSX only; no Next.js, TypeScript,
 or router. `src/main.jsx` mounts `src/App.jsx`, which exports the complete premium
-website from `src/ExistingSite.jsx`. The original components, animations, filters,
+website from `src/ExistingSite.jsx`. The original components, animations,
 map and media fallbacks are active. The sections below describe the existing site.
 
 ```text
@@ -55,9 +55,18 @@ npm run qr       # regenerate QR codes → qr/
 
 ## Editing locations
 
-All studio data lives in [src/data/studios.js](src/data/studios.js). Add a new object to the array and
-everything (cards, city filters, counts, map, footer) updates automatically. Optional fields
-(`facebook`, `instagram`, `coordinates`, `district`) can stay `null`; the UI hides what is missing.
+All studio data lives in [src/data/studios.js](src/data/studios.js). Every published studio is shown
+immediately (no search or filters), and the cards, counts, map and footer update automatically.
+
+- `published: false` hides an entry completely. Location 5 (`studio-5`) is kept this way until its
+  details are confirmed: fill in `name`, `city`, `street` and `website` or `facebook`, then set `published: true`.
+  Incomplete entries stay hidden even when marked as published.
+- Primary button: **Odwiedź stronę** when `website` is set, otherwise **Odwiedź Facebook**.
+  Secondary button: **Wyznacz trasę** (Google Maps directions built from the street address or verified `coordinates`).
+- Layout: one column on mobile, two on tablet; on desktop, three per row (5 studios → 3 + 2 centred),
+  with 4 studios shown as a balanced 2 × 2 grid.
+- Optional fields (`district`, `facebook`, `instagram`, `coordinates`) can stay `null`; the UI hides what is missing.
+
 Only enter verified information.
 
 ## Media — where to put files
@@ -71,9 +80,9 @@ Media is detected at build time, so the site never links to a file that does not
 | Hero video, WebM (optional) | `public/videos/studio-figura-hero.webm` | VP9, offered first to browsers that support it |
 | Hero video, mobile (optional) | `public/videos/studio-figura-hero-mobile.mp4` | Portrait 720×1280, < 2 MB. Without it, phones show the still image (faster for QR visitors) |
 | Hero poster / still | `public/images/hero-poster.webp` (or `.jpg`) | ~1920×1080, < 250 KB. Shown before the video loads and as the mobile background |
-| Studio photos | `public/images/studios/<id>.webp` (or `.jpg`) | `<id>` from studios.js: `strzelin.webp`, `wroclaw-zwycieska.webp`, `wroclaw-szczepin.webp`. 1200×750 (16:10), < 200 KB |
+| Studio photos | `public/images/studios/<id>.webp` (or `.jpg`) | `<id>` from studios.js: `strzelin.webp`, `wroclaw-zwycieska.webp`, `wroclaw-szczepin.webp`, `bielany-wroclawskie.webp`. 1200×750 (16:10), < 200 KB |
 
-Without media, the hero and cards use built-in brand artwork (arches in forest green and champagne gold).
+Without media, the hero uses built-in brand artwork, and each card gets its own distinct illustrative artwork (clearly abstract, not a photo of the location).
 Video never loads for visitors with *reduced motion* or *data saver* enabled.
 Use only footage and photos you have rights to.
 

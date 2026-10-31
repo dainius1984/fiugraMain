@@ -3,13 +3,14 @@ import { motion, useReducedMotion, useScroll, useTransform } from 'motion/react'
 import { ArrowDown } from 'lucide-react'
 import HeroMedia from './HeroMedia'
 import { EASE } from './Reveal'
+import { plural } from '../lib/studio-utils'
 
 const LINES = [
   { words: ['Twoje', 'piękno.'], className: 'text-ivory-50' },
   { words: ['Twoje', 'miejsce.'], className: 'italic text-gold-200' },
 ]
 
-export default function Hero({ cities, onPickCity }) {
+export default function Hero({ studioCount }) {
   const ref = useRef(null)
   const reduceMotion = useReducedMotion()
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] })
@@ -24,7 +25,7 @@ export default function Hero({ cities, onPickCity }) {
     <section
       ref={ref}
       aria-labelledby="hero-heading"
-      className="relative isolate flex h-[78svh] min-h-[540px] items-end overflow-hidden bg-forest-950 text-ivory-100 md:h-svh md:min-h-[680px]"
+      className="relative isolate flex h-[74svh] min-h-[520px] items-end overflow-hidden bg-forest-950 text-ivory-100 md:h-svh md:min-h-[680px]"
     >
       {/* Media with slow cinematic settle + scroll parallax */}
       <motion.div
@@ -117,20 +118,9 @@ export default function Hero({ cities, onPickCity }) {
             </span>
           </motion.a>
 
-          {/* Quick city access — gets QR visitors to their studio in one tap */}
-          <nav aria-label="Szybki wybór miasta" className="flex flex-wrap items-center gap-2">
-            {cities.map(({ city, count }) => (
-              <a
-                key={city}
-                href="#studia"
-                onClick={() => onPickCity(city)}
-                className="inline-flex min-h-11 items-center gap-2 rounded-full border border-ivory-100/20 px-4 text-sm text-ivory-100/85 backdrop-blur-sm transition-colors duration-500 ease-luxe hover:border-gold-300/70 hover:text-ivory-50"
-              >
-                {city}
-                <span className="text-xs text-gold-300/90">{count}</span>
-              </a>
-            ))}
-          </nav>
+          <p className="text-sm text-ivory-100/65 sm:max-w-[16rem]">
+            {studioCount} {plural(studioCount, ['studio', 'studia', 'studiów'])} — wybierz najbliższe i przejdź na jego stronę.
+          </p>
         </motion.div>
       </motion.div>
 

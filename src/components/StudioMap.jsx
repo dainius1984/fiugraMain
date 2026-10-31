@@ -97,7 +97,7 @@ export default function StudioMap({ studios }) {
               className="group mt-6 inline-flex min-h-12 items-center gap-2 text-[0.8rem] font-semibold uppercase tracking-[0.16em] text-forest-900"
             >
               <span className="border-b border-gold-500/60 pb-1 transition-colors duration-500 group-hover:border-forest-900">
-                Prowadź do: {active.name.replace(/^Studio Figura\s*/, '')}
+                Wyznacz trasę: {active.name.replace(/^Studio Figura\s*/, '')}
               </span>
               <ArrowUpRight className="size-4 transition-transform duration-500 ease-luxe group-hover:-translate-y-0.5 group-hover:translate-x-0.5" strokeWidth={1.75} />
               <span className="sr-only">(otwiera Mapy Google w nowej karcie)</span>

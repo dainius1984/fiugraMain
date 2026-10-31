@@ -16,7 +16,7 @@ function Word({ children, progress, range, still }) {
   )
 }
 
-export default function BrandStatement({ studioCount, cityCount }) {
+export default function BrandStatement({ studioCount, places }) {
   const ref = useRef(null)
   const reduceMotion = useReducedMotion()
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start 0.85', 'end 0.55'] })
@@ -55,14 +55,13 @@ export default function BrandStatement({ studioCount, cityCount }) {
           ))}
         </p>
 
-        <div className="mt-14 grid grid-cols-2 gap-6 border-t border-ivory-100/10 pt-8 sm:max-w-lg md:mt-20">
+        <div className="mt-14 flex flex-col gap-6 border-t border-ivory-100/10 pt-8 sm:flex-row sm:items-end sm:gap-12 md:mt-20">
           <Reveal>
             <p className="font-serif text-5xl text-gold-200 md:text-6xl">{studioCount}</p>
             <p className="eyebrow mt-2 text-ivory-100/60">{plural(studioCount, ['Studio', 'Studia', 'Studiów'])}</p>
           </Reveal>
           <Reveal delay={0.1}>
-            <p className="font-serif text-5xl text-gold-200 md:text-6xl">{cityCount}</p>
-            <p className="eyebrow mt-2 text-ivory-100/60">{plural(cityCount, ['Miasto', 'Miasta', 'Miast'])}</p>
+            <p className="font-serif text-2xl italic leading-snug text-ivory-100/80 md:text-3xl">{places.join(' · ')}</p>
           </Reveal>
         </div>
       </div>

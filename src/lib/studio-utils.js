@@ -4,14 +4,27 @@ export function fullAddress(studio) {
   return `${studio.street}, ${studio.city}`
 }
 
+/** Short, prominent label for a card: the district when present, otherwise the town. */
+export function shortLabel(studio) {
+  return studio.district ?? studio.city
+}
+
 export function studioImage(studio) {
   return studio.image ?? STUDIO_IMAGES[studio.id] ?? null
 }
 
+/** Main destination for a studio: its website, or its Facebook page when there is no website. */
+export function primaryLink(studio) {
+  if (studio.website) return { href: studio.website, kind: 'website', label: 'Odwiedź stronę' }
+  if (studio.facebook) return { href: studio.facebook, kind: 'facebook', label: 'Odwiedź Facebook' }
+  return null
+}
+
+/** Google Maps directions built from verified coordinates, or the studio's street address. */
 export function directionsUrl(studio) {
   const destination = studio.coordinates
     ? `${studio.coordinates.lat},${studio.coordinates.lng}`
-    : `${studio.name}, ${fullAddress(studio)}`
+    : `${fullAddress(studio)}, Polska`
   return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}`
 }
 
@@ -20,29 +33,6 @@ export function mapEmbedUrl(studio) {
     ? `${studio.coordinates.lat},${studio.coordinates.lng}`
     : `${fullAddress(studio)}, Polska`
   return `https://www.google.com/maps?q=${encodeURIComponent(q)}&z=16&output=embed`
-}
-
-export function displayHost(url) {
-  return url.replace(/^https?:\/\//, '').replace(/\/$/, '')
-}
-
-/** Lowercase + strip Polish diacritics so "wroclaw" matches "Wrocław". */
-export function normalize(text) {
-  return (text ?? '')
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/ł/g, 'l')
-    .trim()
-}
-
-export function matchesQuery(studio, query) {
-  const q = normalize(query)
-  if (!q) return true
-  const haystack = normalize(
-    [studio.name, studio.city, studio.district, studio.street].filter(Boolean).join(' ')
-  )
-  return q.split(/\s+/).every((token) => haystack.includes(token))
 }
 
 /** Polish plural: plural(3, ['studio', 'studia', 'studiów']) → 'studia'. */
