@@ -14,16 +14,16 @@ export default function ExistingSite() {
   return (
     <MotionConfig reducedMotion="user">
       <a
-        href="#studia"
+        href="#mapa"
         className="sr-only z-[60] rounded-full bg-brand-400 px-5 py-3 text-ink-950 focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
       >
-        Przejdź do listy studiów
+        Przejdź do mapy studiów
       </a>
       <Navigation />
       <main id="top">
         <Hero studioCount={studios.length} places={places} />
-        <StudioDirectory studios={studios} />
         <StudioMap studios={studios} />
+        <StudioDirectory studios={studios} />
         <BrandStatement studioCount={studios.length} places={places} />
       </main>
       <Footer studios={studios} />

@@ -24,9 +24,9 @@ export default function Hero({ studioCount, places = [] }) {
     <section
       ref={ref}
       aria-labelledby="hero-heading"
-      className="relative isolate overflow-hidden bg-ivory-100 pb-10 pt-20 text-ink-900 md:pt-24 lg:flex lg:min-h-[min(100svh,960px)] lg:items-center lg:pb-16 lg:pt-28"
+      className="relative isolate overflow-hidden bg-ivory-100 pb-8 pt-20 text-ink-900 md:pb-12 md:pt-24 lg:flex lg:min-h-[min(100svh,960px)] lg:items-center lg:pb-16 lg:pt-28"
     >
-      <div className="container-site flex flex-col gap-7 md:gap-10 lg:grid lg:grid-cols-2 lg:items-center lg:gap-12 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] xl:gap-16">
+      <div className="container-site flex flex-col gap-6 md:gap-10 lg:grid lg:grid-cols-2 lg:items-center lg:gap-12 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] xl:gap-16">
         {/* Media — campaign photo (or video when supplied), otherwise the natural-light artwork */}
         <div className="relative lg:order-2">
           {/* Reserved box (fixed aspect ratio) → no layout shift while the photo loads */}
@@ -34,7 +34,7 @@ export default function Hero({ studioCount, places = [] }) {
             initial={reduceMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1.4, ease: EASE, delay: 0.1 }}
-            className="group/hero relative aspect-[16/10] max-h-[34svh] w-full overflow-hidden rounded-[1.25rem] bg-ivory-200 md:aspect-[16/8] md:max-h-[40svh] lg:ml-auto lg:aspect-[4/5] lg:max-h-[min(76svh,720px)] xl:max-h-[min(80svh,820px)] lg:rounded-[2rem] lg:rounded-tl-[9rem]"
+            className="group/hero relative aspect-[16/9] max-h-[30svh] w-full overflow-hidden rounded-[1.25rem] bg-ivory-200 md:aspect-[16/8] md:max-h-[40svh] lg:ml-auto lg:aspect-[4/5] lg:max-h-[min(76svh,720px)] xl:max-h-[min(80svh,820px)] lg:rounded-[2rem] lg:rounded-tl-[9rem]"
           >
             <motion.div className="absolute inset-0" style={reduceMotion ? undefined : { scale: mediaScale }}>
               {/* Barely-there hover drift for mouse users */}
@@ -86,7 +86,7 @@ export default function Hero({ studioCount, places = [] }) {
 
           <h1
             id="hero-heading"
-            className="font-serif text-[3.2rem] font-normal leading-[0.98] tracking-[-0.01em] sm:text-7xl lg:text-[4.4rem] xl:text-[5.8rem]"
+            className="font-serif text-[3rem] font-normal leading-[0.98] tracking-[-0.01em] sm:text-7xl lg:text-[4.4rem] xl:text-[5.8rem]"
           >
             {LINES.map((line, li) => (
               <span key={li} className={`block whitespace-nowrap ${line.className}`}>
@@ -114,7 +114,7 @@ export default function Hero({ studioCount, places = [] }) {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1.1, ease: EASE, delay: 1 }}
-            className="mt-4 max-w-md text-[1.05rem] leading-relaxed text-ink-600 md:mt-6 md:text-lg lg:mt-8"
+            className="mt-3 max-w-md text-[1.05rem] leading-relaxed text-ink-600 md:mt-6 md:text-lg lg:mt-8"
           >
             Znajdź swoje Studio Figura i odkryj przestrzeń stworzoną z myślą o Tobie.
           </motion.p>
@@ -123,10 +123,10 @@ export default function Hero({ studioCount, places = [] }) {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1.1, ease: EASE, delay: 1.15 }}
-            className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6 lg:mt-10"
+            className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6 lg:mt-10"
           >
             <motion.a
-              href="#studia"
+              href="#mapa"
               whileTap={{ scale: 0.97 }}
               className="group relative isolate inline-flex min-h-14 items-center justify-between gap-6 overflow-hidden rounded-full bg-ink-900 py-2 pl-7 pr-2 text-[0.8rem] font-semibold uppercase tracking-[0.18em] text-ivory-50 transition-colors duration-500 ease-luxe sm:justify-start"
             >
@@ -141,7 +141,7 @@ export default function Hero({ studioCount, places = [] }) {
             </motion.a>
 
             <p className="text-sm leading-relaxed text-ink-600 sm:max-w-[15rem] lg:hidden">
-              {studioCount} {studiosLabel} — wybierz najbliższe i przejdź na jego stronę.
+              {studioCount} {studiosLabel} — wybierz swoje na mapie.
             </p>
           </motion.div>
         </div>

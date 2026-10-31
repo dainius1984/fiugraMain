@@ -41,3 +41,8 @@ export function plural(n, [one, few, many]) {
   const dd = n % 100
   return d >= 2 && d <= 4 && (dd < 12 || dd > 14) ? few : many
 }
+
+export const pad2 = (n) => String(n).padStart(2, '0')
+
+/** "Studio Figura Wrocław Szczepin" → "Wrocław Szczepin". */
+export const shortStudioName = (name) => name.replace(/^Studio Figura\s*/, '')

@@ -55,7 +55,7 @@ export default function Navigation() {
         </ul>
 
         <a
-          href="#studia"
+          href="#mapa"
           className="inline-flex min-h-11 items-center rounded-full bg-ink-900 px-5 text-[0.7rem] xl:min-h-12 xl:px-6 xl:text-[0.75rem] font-semibold uppercase tracking-[0.2em] text-ivory-50 transition-colors duration-500 ease-luxe hover:bg-brand-600"
         >
           <span className="md:hidden">Studia</span>

@@ -108,6 +108,8 @@ function heroPreload() {
 
 export default defineConfig({
   plugins: [react(), tailwindcss(), heroPreload()],
+  // MapLibre (~1 MB) is a lazy chunk loaded only after the visitor activates the map.
+  build: { chunkSizeWarningLimit: 1200 },
   define: {
     __HERO_MEDIA__: JSON.stringify({
       ...hero,

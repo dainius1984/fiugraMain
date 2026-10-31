@@ -58,14 +58,13 @@ npm run qr       # regenerate QR codes → qr/
 All studio data lives in [src/data/studios.js](src/data/studios.js). Every published studio is shown
 immediately (no search or filters), and the cards, counts, map and footer update automatically.
 
-- Four locations: Wrocław Szczepin, Wrocław Swojczyce (website ends in **.com**; Szczepin's ends in **.pl**),
-  Wrocław Zwycięska and Bielany Wrocławskie (Facebook only). The client asked on 2026-10-31 for the
-  Strzelin location to be removed from the website.
+- Five locations: Wrocław Szczepin, Wrocław Swojczyce (website ends in **.com**; Szczepin's ends in **.pl**),
+  Wrocław Zwycięska, Bielany Wrocławskie (Facebook only) and Strzelin. The client confirmed these five, including Strzelin.
 - `published: false` hides an entry completely; incomplete entries stay hidden even when published.
 - Primary button: **Odwiedź stronę** when `website` is set, otherwise **Odwiedź Facebook**.
   Secondary button: **Wyznacz trasę** (Google Maps directions built from the street address).
-- Layout: one column on mobile, two on tablet, and a balanced, centred 2 × 2 grid on desktop for the four studios
-  (a five-studio list would switch to 3 + 2 centred).
+- Page order: hero → **map (main feature)** → studio cards → brand statement → footer. "Znajdź studio" links to `#mapa`.
+- Card layout: one column on mobile, two on tablet and laptops, 3 + 2 centred from 1280px.
 - Optional fields (`district`, `facebook`, `instagram`) can stay `null`; the UI hides what is missing.
 
 Only enter verified information.
@@ -106,16 +105,28 @@ at the wordmark's height. Until then, the temporary typographic lockup in
 
 ## Map
 
-The *Znajdź nas na mapie* section shows all studios on one map, built with
-[Leaflet](https://leafletjs.com/) and OpenStreetMap tiles (no API key or billing).
+The *Znajdź swoje Studio Figura* section is the main feature: one large map of all studios, a selector below it,
+and a details panel for the chosen studio.
 
-- Leaflet (~43 KB gzipped) loads lazily when the section approaches the viewport.
-- Markers use `coordinates` in studios.js. Each studio has building-level coordinates from
-  OpenStreetMap / Nominatim, checked on 2026-10-31. A studio without `coordinates` is left off the map.
-- Clicking a marker or a list entry opens a popup with the primary link and **Wyznacz trasę**.
-- The map never captures the mouse wheel. On phones, the first tap unlocks dragging, so page scrolling is never trapped.
-- OpenStreetMap tiles are free under the [tile usage policy](https://operations.osmfoundation.org/policies/tiles/),
-  which suits a small site. For heavy traffic, switch the URL in `StudioMap.jsx` to a commercial tile provider.
+- **Library:** [MapLibre GL JS](https://maplibre.org/) 6.x (`maplibre-gl`), set up as the docs describe for bundlers:
+  named imports, `setWorkerUrl` with `maplibre-gl-worker.mjs?worker&url`, and the package CSS.
+  Code: `src/components/map/createStudioMap.js`. It needs WebGL 2; without it the site says so and the selector still works.
+- **Tiles:** [OpenFreeMap](https://openfreemap.org/) style `positron` (vector tiles, no API key or billing). Its own
+  attribution ("OpenFreeMap © OpenMapTiles Data from OpenStreetMap") is always shown. Land and water are lightly warmed to the brand palette.
+- **Privacy and performance:** MapLibre (about 290 KB gzipped) and the tiles load only after the visitor presses
+  **Pokaż interaktywną mapę**. The choice is remembered on that device (`localStorage` key `sf-map-consent`).
+  Before that, a static preview shows the studios at their true relative positions, and the selector and
+  details panel work without the map.
+- **Markers:** numbered 01–05 in data order. Black with an orange ring; the active one turns orange. They appear with a short stagger,
+  show the studio name on hover/keyboard focus, and are real buttons (keyboard and screen-reader accessible).
+- **Selecting** a marker or a selector item flies the camera to the studio (500–900 ms depending on distance) and opens the
+  details panel: name, address, **Odwiedź stronę** / **Odwiedź Facebook**, **Wyznacz trasę**. Nothing redirects
+  automatically. Escape or × closes the panel. On phones the panel sits below the map; on desktop it floats at the top-left.
+- **Pokaż wszystkie lokalizacje** clears the selection and fits all studios again.
+- **Gestures:** cooperative gestures, so the page always scrolls normally (Ctrl/⌘ + scroll to zoom; two fingers to pan on phones).
+  No rotation or tilt. Reduced motion turns off the marker stagger, camera flights and intro zoom.
+- **Coordinates:** `coordinates` in studios.js (stored as `{ lat, lng }`, converted to MapLibre's `[lng, lat]` in one place).
+  All five were re-checked with OpenStreetMap Nominatim on 2026-10-31; each matches the exact house number.
 
 ## Visual identity
 

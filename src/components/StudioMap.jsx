@@ -1,263 +1,292 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { useReducedMotion } from 'motion/react'
-import { Maximize2 } from 'lucide-react'
-import Reveal from './Reveal'
-import { directionsUrl, fullAddress, locationsPhrase, primaryLink } from '../lib/studio-utils'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import { MapPinned } from 'lucide-react'
+import Reveal, { EASE } from './Reveal'
+import MapPopup from './map/MapPopup'
+import MapLocationSelector from './map/MapLocationSelector'
+import { locationsPhrase, pad2 } from '../lib/studio-utils'
 
-// Extra top padding leaves room for the pins above their coordinates.
-const FIT = { paddingTopLeft: [28, 56], paddingBottomRight: [28, 24] }
-
-const escapeHtml = (text) =>
-  String(text).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
-
-function popupHtml(studio) {
-  const primary = primaryLink(studio)
-  return `
-    <div class="sf-popup">
-      <p class="sf-popup__name">${escapeHtml(studio.name)}</p>
-      <p class="sf-popup__address">${escapeHtml(fullAddress(studio))}</p>
-      <div class="sf-popup__actions">
-        <a href="${escapeHtml(primary.href)}" target="_blank" rel="noopener noreferrer" class="sf-popup__primary">${escapeHtml(primary.label)}</a>
-        <a href="${escapeHtml(directionsUrl(studio))}" target="_blank" rel="noopener noreferrer" class="sf-popup__secondary">Wyznacz trasę</a>
-      </div>
-    </div>`
-}
+const CONSENT_KEY = 'sf-map-consent'
+const DESKTOP = '(min-width: 1024px)'
 
 /**
- * Overview map of every studio (Leaflet + OpenStreetMap, no API key).
- * Leaflet is loaded lazily when the section approaches the viewport.
- * Markers use the verified `coordinates` from studios.js.
+ * The studio finder — the site's central feature.
+ *
+ * Privacy: OpenFreeMap tiles (and MapLibre itself) load only after the visitor presses
+ * "Pokaż interaktywną mapę" (remembered on this device). Until then a static preview shows the
+ * studios at their true relative positions, and the selector + details panel work fully.
+ *
+ * One `selectedId` drives markers, selector and the details panel.
  */
 export default function StudioMap({ studios }) {
-  const located = studios.filter((s) => s.coordinates)
+  const located = useMemo(() => studios.filter((s) => s.coordinates), [studios])
+  const reduceMotion = useReducedMotion()
   const sectionRef = useRef(null)
   const mapEl = useRef(null)
-  const mapRef = useRef(null)
-  const markersRef = useRef({})
-  const boundsRef = useRef(null)
-  const [activeId, setActiveId] = useState(null)
-  const [ready, setReady] = useState(false)
-  const [touchLocked, setTouchLocked] = useState(false)
-  const reduceMotion = useReducedMotion()
+  const panelRef = useRef(null)
+  const controllerRef = useRef(null)
 
-  // Load Leaflet only when the map is about to be seen.
+  const [selectedId, setSelectedId] = useState(null)
+  const [consent, setConsent] = useState(false)
+  const [nearViewport, setNearViewport] = useState(false)
+  const [status, setStatus] = useState('preview') // preview | loading | ready | unsupported | error
+
+  const selected = located.find((s) => s.id === selectedId) ?? null
+  const selectedIndex = located.findIndex((s) => s.id === selectedId)
+
+  // Remembered consent → load automatically, but only once the section is close to view.
   useEffect(() => {
-    const section = sectionRef.current
-    if (!section || located.length === 0) return
-    let cancelled = false
-
-    const init = async () => {
-      const [{ default: L }] = await Promise.all([import('leaflet'), import('leaflet/dist/leaflet.css')])
-      if (cancelled || !mapEl.current || mapRef.current) return
-
-      const isTouch = window.matchMedia('(pointer: coarse)').matches
-      const map = L.map(mapEl.current, {
-        scrollWheelZoom: false, // never hijack page scrolling
-        dragging: !isTouch, // on phones: tap the map first, then drag
-        zoomControl: false,
-      })
-      L.control.zoom({ position: 'bottomright', zoomInTitle: 'Przybliż', zoomOutTitle: 'Oddal' }).addTo(map)
-      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-      }).addTo(map)
-
-      located.forEach((studio, i) => {
-        const icon = L.divIcon({
-          className: 'sf-marker',
-          html: `<span class="sf-pin"><span>${i + 1}</span></span>`,
-          iconSize: [36, 40],
-          iconAnchor: [18, 36], // the rotated square's tip
-          popupAnchor: [0, -36],
-        })
-        const marker = L.marker([studio.coordinates.lat, studio.coordinates.lng], {
-          icon,
-          title: studio.name,
-          alt: studio.name,
-          riseOnHover: true,
-        })
-          .bindPopup(popupHtml(studio), { className: 'sf-leaflet-popup', maxWidth: 280 })
-          .addTo(map)
-        marker.on('popupopen', () => setActiveId(studio.id))
-        marker.on('popupclose', () => setActiveId((id) => (id === studio.id ? null : id)))
-        markersRef.current[studio.id] = marker
-      })
-
-      boundsRef.current = L.latLngBounds(located.map((s) => [s.coordinates.lat, s.coordinates.lng]))
-      map.fitBounds(boundsRef.current, FIT)
-
-      map.on('focus click', () => map.scrollWheelZoom.enable())
-      map.on('blur mouseout', () => map.scrollWheelZoom.disable())
-      if (isTouch) {
-        setTouchLocked(true)
-        map.once('click', () => {
-          map.dragging.enable()
-          setTouchLocked(false)
-        })
-      }
-
-      // Keep Leaflet in sync with its container (window resizes, breakpoint and font-scale changes).
-      const resizeObserver = new ResizeObserver(() => map.invalidateSize({ pan: false }))
-      resizeObserver.observe(mapEl.current)
-      map.once('unload', () => resizeObserver.disconnect())
-
-      mapRef.current = map
-      setReady(true)
+    try {
+      if (localStorage.getItem(CONSENT_KEY) === '1') setConsent(true)
+    } catch {
+      /* storage unavailable: ask again */
     }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          observer.disconnect()
-          init()
-        }
-      },
-      { rootMargin: '600px 0px' }
-    )
-    observer.observe(section)
-
-    return () => {
-      cancelled = true
-      observer.disconnect()
-      mapRef.current?.remove()
-      mapRef.current = null
-      markersRef.current = {}
-    }
-    // Studios are static data; initialise once.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const io = new IntersectionObserver(([entry]) => entry.isIntersecting && setNearViewport(true), { rootMargin: '400px 0px' })
+    if (sectionRef.current) io.observe(sectionRef.current)
+    return () => io.disconnect()
   }, [])
 
-  // Keep the active marker visually highlighted.
+  // Lazy-load MapLibre and create the single map instance.
   useEffect(() => {
-    for (const [id, marker] of Object.entries(markersRef.current)) {
-      marker.getElement()?.classList.toggle('is-active', id === activeId)
+    if (!consent || !nearViewport || !mapEl.current) return
+    let cancelled = false
+    setStatus('loading')
+    import('./map/createStudioMap')
+      .then(({ createStudioMap, webgl2Supported }) => {
+        if (cancelled) return
+        if (!webgl2Supported()) {
+          setStatus('unsupported')
+          return
+        }
+        try {
+          controllerRef.current = createStudioMap(mapEl.current, {
+            studios: located,
+            reduceMotion: Boolean(reduceMotion),
+            isCompact: () => !window.matchMedia(DESKTOP).matches,
+            onSelect: (id) => setSelectedId(id),
+            onReady: () => !cancelled && setStatus('ready'),
+          })
+        } catch (error) {
+          console.warn('Studio map unavailable:', error)
+          setStatus('unsupported')
+        }
+      })
+      .catch((error) => {
+        console.warn('Studio map failed to load:', error)
+        if (!cancelled) setStatus('error')
+      })
+    return () => {
+      cancelled = true
+      controllerRef.current?.destroy()
+      controllerRef.current = null
     }
-  }, [activeId, ready])
+    // The studio list is static data; reduced-motion is read once at creation.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [consent, nearViewport])
 
-  const focusStudio = useCallback(
-    (studio) => {
-      const map = mapRef.current
-      const marker = markersRef.current[studio.id]
-      if (!map || !marker) return
-      if (window.matchMedia('(max-width: 1023px)').matches) {
-        mapEl.current?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' })
-      }
-      const target = [studio.coordinates.lat, studio.coordinates.lng]
-      map.closePopup()
-      map.once('moveend', () => marker.openPopup())
-      if (reduceMotion) map.setView(target, 15, { animate: false })
-      else map.flyTo(target, 15, { duration: 1.2 })
-      setActiveId(studio.id)
-    },
-    [reduceMotion]
-  )
+  // Sync selection → markers + camera.
+  useEffect(() => {
+    const controller = controllerRef.current
+    if (!controller || status !== 'ready') return
+    controller.setActive(selectedId)
+    if (selectedId) controller.focus(selectedId)
+  }, [selectedId, status])
 
-  const showAll = () => {
-    const map = mapRef.current
-    if (!map || !boundsRef.current) return
-    map.closePopup()
-    if (reduceMotion) map.fitBounds(boundsRef.current, { ...FIT, animate: false })
-    else map.flyToBounds(boundsRef.current, { ...FIT, duration: 1.1 })
-    setActiveId(null)
-  }
+  // On phones the details panel sits under the map: bring it into view after a selection.
+  useEffect(() => {
+    if (!selectedId || window.matchMedia(DESKTOP).matches) return
+    const id = requestAnimationFrame(() =>
+      panelRef.current?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'nearest' })
+    )
+    return () => cancelAnimationFrame(id)
+  }, [selectedId, reduceMotion])
 
-  if (located.length === 0) return null
+  const activate = useCallback(() => {
+    setConsent(true)
+    setNearViewport(true)
+    try {
+      localStorage.setItem(CONSENT_KEY, '1')
+    } catch {
+      /* ignore */
+    }
+  }, [])
+
+  const showAll = useCallback(() => {
+    setSelectedId(null)
+    controllerRef.current?.setActive(null)
+    controllerRef.current?.showAll()
+  }, [])
+
+  const live = status === 'ready'
 
   return (
     <section
       ref={sectionRef}
       id="mapa"
       aria-labelledby="mapa-heading"
-      className="border-t border-brand-300/50 bg-ivory-50 py-16 md:py-28"
+      className="bg-ivory-100 pb-14 pt-8 md:pb-24 md:pt-20"
+      onKeyDown={(e) => e.key === 'Escape' && selectedId && setSelectedId(null)}
     >
       <div className="container-site">
         <div className="mx-auto max-w-2xl text-center">
           <Reveal>
-            <h2 id="mapa-heading" className="font-serif text-[2.4rem] leading-[1.02] text-ink-900 sm:text-6xl">
-              Znajdź nas <em className="text-brand-400">na mapie</em>
+            <h2 id="mapa-heading" className="font-serif text-[2.4rem] leading-[1.02] text-ink-900 sm:text-6xl lg:text-[4.2rem]">
+              Znajdź swoje <em className="text-brand-400">Studio&nbsp;Figura</em>
             </h2>
           </Reveal>
-          <Reveal delay={0.1}>
-            <p className="mx-auto mt-4 max-w-xl text-[1.05rem] leading-relaxed text-ink-600 md:mt-6 md:text-lg">
-              {locationsPhrase(located.length)}. Wybierz tę, do której masz najbliżej.
+          <Reveal delay={0.08}>
+            <p className="mx-auto mt-3 max-w-xl text-[1.02rem] leading-relaxed text-ink-600 md:mt-5 md:text-lg">
+              Wybierz lokalizację na mapie i odwiedź stronę swojego gabinetu.
             </p>
           </Reveal>
         </div>
 
-        <div className="mt-10 grid gap-6 md:mt-14 lg:grid-cols-[minmax(0,35fr)_minmax(0,65fr)] lg:gap-10 xl:gap-12">
-          <Reveal delay={0.12} className="order-2 lg:order-1">
-            <ol className="divide-y divide-brand-300/50 border-y border-brand-300/50" aria-label="Lokalizacje na mapie">
-              {located.map((studio, i) => {
-                const isActive = studio.id === activeId
-                return (
-                  <li key={studio.id}>
-                    <button
-                      type="button"
-                      onClick={() => focusStudio(studio)}
-                      aria-pressed={isActive}
-                      className="group flex min-h-16 w-full items-center gap-4 py-3.5 text-left"
-                    >
-                      <span
-                        aria-hidden="true"
-                        className={`grid size-8 shrink-0 place-items-center rounded-full border text-xs font-semibold transition-colors duration-500 ease-luxe ${
-                          isActive
-                            ? 'border-brand-400 bg-brand-400 text-ink-900'
-                            : 'border-ink-900 bg-ink-900 text-brand-400 group-hover:border-brand-400'
-                        }`}
-                      >
-                        {i + 1}
-                      </span>
-                      <span className="flex-1">
-                        <span className="block font-serif text-[1.35rem] leading-tight text-ink-900">
-                          {studio.name.replace(/^Studio Figura\s*/, '')}
-                        </span>
-                        <span className="mt-0.5 block text-sm text-ink-600">{fullAddress(studio)}</span>
-                      </span>
-                      <span
-                        aria-hidden="true"
-                        className={`h-px bg-brand-400 transition-[width] duration-700 ease-luxe ${
-                          isActive ? 'w-8' : 'w-0 group-hover:w-5'
-                        }`}
-                      />
-                    </button>
-                  </li>
-                )
-              })}
-            </ol>
-            <button
-              type="button"
-              onClick={showAll}
-              className="group mt-5 inline-flex min-h-12 items-center gap-2 text-[0.75rem] font-semibold uppercase tracking-[0.18em] text-ink-900"
-            >
-              <Maximize2 className="size-4 text-brand-400" strokeWidth={1.75} aria-hidden="true" />
-              <span className="border-b border-brand-400/60 pb-0.5 transition-colors duration-500 group-hover:border-ink-900">
-                Pokaż wszystkie studia
-              </span>
-            </button>
-          </Reveal>
-
-          <Reveal delay={0.18} className="order-1 lg:order-2">
-            <div className="relative isolate overflow-hidden rounded-[1.5rem] ring-1 ring-brand-300/60">
-              <div
-                ref={mapEl}
-                role="region"
-                aria-label="Mapa lokalizacji Studio Figura"
-                className="sf-map h-[520px] w-full bg-ivory-200 lg:h-[620px] xl:h-[680px]"
+        <Reveal delay={0.12} y={20} className="mt-7 md:mt-10">
+          <div className="relative">
+            {/* Map frame — fixed height (no layout shift); preview underneath, live map fades in on top */}
+            <div className="relative isolate h-[clamp(360px,56svh,440px)] overflow-hidden rounded-[1.25rem] bg-ivory-200 shadow-[0_30px_70px_-45px_rgba(23,23,23,0.45)] ring-1 ring-brand-200 md:h-[500px] md:rounded-[1.5rem] lg:h-[600px] xl:h-[640px]">
+              <MapPreview
+                studios={located}
+                selectedId={selectedId}
+                onSelect={setSelectedId}
+                status={status}
+                onActivate={activate}
+                hidden={live}
+                reduceMotion={reduceMotion}
               />
-              {!ready && (
-                <div className="pointer-events-none absolute inset-0 grid place-items-center text-sm text-ink-600">
-                  Ładowanie mapy…
-                </div>
-              )}
-              {touchLocked && (
-                <p className="pointer-events-none absolute inset-x-0 top-3 z-[500] mx-auto w-max rounded-full bg-ink-900/80 px-4 py-2 text-xs text-ivory-50 backdrop-blur">
-                  Dotknij mapy, aby ją przesuwać
-                </p>
-              )}
+              {/* React owns only this wrapper's classes; MapLibre owns the inner container's. */}
+              <div className={`absolute inset-0 transition-opacity duration-700 ease-luxe ${live ? 'opacity-100' : 'pointer-events-none opacity-0'}`}>
+                <div ref={mapEl} role="region" aria-label="Interaktywna mapa studiów Studio Figura" className="sf-map h-full w-full" />
+              </div>
             </div>
-          </Reveal>
-        </div>
+
+            <AnimatePresence mode="wait">
+              {selected && (
+                <MapPopup
+                  key={selected.id}
+                  studio={selected}
+                  number={pad2(selectedIndex + 1)}
+                  onClose={() => setSelectedId(null)}
+                  reduceMotion={reduceMotion}
+                  panelRef={panelRef}
+                />
+              )}
+            </AnimatePresence>
+          </div>
+        </Reveal>
+
+        <p aria-live="polite" className="sr-only">
+          {selected ? `Wybrano: ${selected.name}, ${selected.street}, ${selected.city}.` : ''}
+        </p>
+
+        <MapLocationSelector
+          studios={located}
+          selectedId={selectedId}
+          onSelect={setSelectedId}
+          onShowAll={showAll}
+          controlsId="map-studio-details"
+        />
       </div>
     </section>
+  )
+}
+
+/* ─────────────────────────── Preview (before activation) ─────────────────────────── */
+
+/** Web-Mercator projection of the studios into a 0–1 box, preserving the true aspect ratio. */
+function useProjection(studios) {
+  return useMemo(() => {
+    const merc = (lat) => Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360))
+    const xs = studios.map((s) => (s.coordinates.lng * Math.PI) / 180)
+    const ys = studios.map((s) => merc(s.coordinates.lat))
+    const [minX, maxX, minY, maxY] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)]
+    const w = maxX - minX || 1
+    const h = maxY - minY || 1
+    return {
+      ratio: w / h,
+      points: studios.map((s, i) => ({ id: s.id, x: (xs[i] - minX) / w, y: (maxY - ys[i]) / h })),
+    }
+  }, [studios])
+}
+
+function MapPreview({ studios, selectedId, onSelect, status, onActivate, hidden, reduceMotion }) {
+  const { ratio, points } = useProjection(studios)
+  const busy = status === 'loading'
+  const failed = status === 'unsupported' || status === 'error'
+
+  return (
+    <div aria-hidden={hidden} className={`absolute inset-0 transition-opacity duration-700 ease-luxe ${hidden ? 'pointer-events-none opacity-0' : 'opacity-100'}`}>
+      {/* Quiet cartographic texture */}
+      <div className="absolute inset-0 bg-[radial-gradient(90%_70%_at_70%_30%,var(--color-ivory-50)_0%,var(--color-ivory-100)_55%,var(--color-ivory-200)_100%)]" />
+      <svg className="absolute inset-0 h-full w-full opacity-60" aria-hidden="true">
+        <defs>
+          <pattern id="sf-grid" width="48" height="48" patternUnits="userSpaceOnUse">
+            <path d="M 48 0 L 0 0 0 48" fill="none" style={{ stroke: 'var(--color-brand-200)' }} strokeWidth="0.6" />
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#sf-grid)" />
+      </svg>
+
+      {/* Plot area: right side on desktop, top part on phones (the activation card takes the rest) */}
+      <div className="absolute inset-x-6 bottom-[46%] top-6 [container-type:size] md:bottom-[40%] lg:inset-y-14 lg:left-[44%] lg:right-14">
+        <div
+          className="relative mx-auto h-full"
+          style={{ width: `min(100cqw, ${(100 * ratio).toFixed(2)}cqh)`, maxHeight: `${(100 / ratio).toFixed(2)}cqw` }}
+        >
+          {points.map((p, i) => {
+            const active = p.id === selectedId
+            return (
+              <motion.button
+                key={p.id}
+                type="button"
+                tabIndex={-1}
+                aria-hidden="true"
+                onClick={() => onSelect(p.id)}
+                initial={reduceMotion ? false : { opacity: 0, scale: 0.6 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, ease: EASE, delay: 0.2 + i * 0.1 }}
+                className="absolute grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center"
+                style={{ left: `${p.x * 100}%`, top: `${p.y * 100}%` }}
+              >
+                <span
+                  className={`grid size-8 place-items-center rounded-full border-[1.5px] border-brand-400 text-[0.7rem] font-semibold shadow-[0_8px_18px_-8px_rgba(23,23,23,0.6)] transition-[background-color,color,scale] duration-500 ease-luxe ${
+                    active ? 'scale-115 bg-brand-400 text-ivory-50' : 'bg-ink-900 text-brand-400'
+                  }`}
+                >
+                  {pad2(i + 1)}
+                </span>
+              </motion.button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Activation card */}
+      <div className="absolute inset-x-3 bottom-3 rounded-2xl bg-ivory-50/95 p-4 shadow-[0_20px_50px_-30px_rgba(23,23,23,0.45)] ring-1 ring-brand-200 backdrop-blur sm:p-5 md:inset-x-auto md:left-6 md:max-w-[24rem] lg:bottom-auto lg:left-10 lg:top-1/2 lg:-translate-y-1/2 lg:p-7">
+        <p className="eyebrow hidden items-center gap-3 text-brand-600 sm:flex">
+          <MapPinned className="size-4 text-brand-400" strokeWidth={1.75} aria-hidden="true" />
+          {locationsPhrase(studios.length)}
+        </p>
+        <p className="font-serif text-[1.35rem] leading-tight text-ink-900 sm:mt-2 sm:text-[1.6rem] lg:text-[1.9rem]">
+          {failed ? 'Mapa jest niedostępna' : 'Wszystkie studia na jednej mapie'}
+        </p>
+        <p className="mt-1.5 text-[0.82rem] leading-snug text-ink-600 lg:mt-3 lg:text-[0.9rem]">
+          {failed
+            ? 'Twoja przeglądarka nie obsługuje mapy interaktywnej. Wybierz studio z listy poniżej.'
+            : 'Mapa wczytuje kafelki z OpenFreeMap (dane © OpenStreetMap) — dopiero po kliknięciu.'}
+        </p>
+        {!failed && (
+          <button
+            type="button"
+            onClick={onActivate}
+            disabled={busy}
+            className="group relative isolate mt-3 inline-flex min-h-12 w-full items-center justify-center gap-2 overflow-hidden rounded-full bg-ink-900 px-5 text-[0.75rem] font-semibold uppercase tracking-[0.16em] text-ivory-50 transition-colors duration-500 ease-luxe disabled:cursor-wait sm:w-auto lg:mt-5 lg:min-h-13"
+          >
+            <span aria-hidden="true" className="absolute inset-0 -z-10 origin-left scale-x-0 bg-brand-600 transition-transform duration-500 ease-luxe group-hover:scale-x-100" />
+            {busy ? 'Wczytywanie mapy…' : 'Pokaż interaktywną mapę'}
+          </button>
+        )}
+      </div>
+    </div>
   )
 }

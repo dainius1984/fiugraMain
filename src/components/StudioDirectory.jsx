@@ -1,6 +1,7 @@
 import { motion } from 'motion/react'
 import StudioCard from './StudioCard'
 import Reveal from './Reveal'
+import { locationsPhrase } from '../lib/studio-utils'
 
 const gridVariants = {
   hidden: {},
@@ -23,20 +24,20 @@ export default function StudioDirectory({ studios }) {
   const balanced = studios.length === 4
 
   return (
-    <section id="studia" aria-labelledby="studia-heading" className="relative bg-ivory-100 py-14 md:py-28">
+    <section id="studia" aria-labelledby="studia-heading" className="relative border-t border-brand-200 bg-ivory-50 py-14 md:py-24">
       <div className="container-wide">
         <div className="mx-auto max-w-2xl text-center">
           <Reveal>
             <h2
               id="studia-heading"
-              className="font-serif text-[2.5rem] leading-[1.02] text-ink-900 sm:text-6xl lg:text-7xl"
+              className="font-serif text-[2.2rem] leading-[1.02] text-ink-900 sm:text-5xl lg:text-[3.6rem]"
             >
-              Znajdź swoje <em className="text-brand-400">Studio&nbsp;Figura</em>
+              Wszystkie <em className="text-brand-400">studia</em>
             </h2>
           </Reveal>
           <Reveal delay={0.1}>
             <p className="mx-auto mt-4 max-w-md text-[1.05rem] leading-relaxed text-ink-600 md:mt-6 md:text-lg">
-              Wybierz najbliższe studio — przejdź na jego stronę lub wyznacz trasę.
+              {locationsPhrase(studios.length)} Studio Figura — przejdź na stronę wybranego studia lub wyznacz trasę.
             </p>
           </Reveal>
           <Reveal delay={0.16}>
