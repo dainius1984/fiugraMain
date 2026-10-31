@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useReducedMotion } from 'motion/react'
 import { Maximize2 } from 'lucide-react'
 import Reveal from './Reveal'
-import { directionsUrl, fullAddress, primaryLink } from '../lib/studio-utils'
+import { directionsUrl, fullAddress, locationsPhrase, primaryLink } from '../lib/studio-utils'
 
 // Extra top padding leaves room for the pins above their coordinates.
 const FIT = { paddingTopLeft: [28, 56], paddingBottomRight: [28, 24] }
@@ -178,8 +178,8 @@ export default function StudioMap({ studios }) {
             </h2>
           </Reveal>
           <Reveal delay={0.1}>
-            <p className="mx-auto mt-4 max-w-md text-[1.05rem] leading-relaxed text-ink-600 md:mt-6 md:text-lg">
-              Pięć lokalizacji. Wybierz tę, do której masz najbliżej.
+            <p className="mx-auto mt-4 max-w-xl text-[1.05rem] leading-relaxed text-ink-600 md:mt-6 md:text-lg">
+              {locationsPhrase(located.length)}. Wybierz tę, do której masz najbliżej.
             </p>
           </Reveal>
         </div>

@@ -26,6 +26,14 @@ export function directionsUrl(studio) {
   return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}`
 }
 
+const NUMBER_WORDS = ['', 'Jedna', 'Dwie', 'Trzy', 'Cztery', 'Pięć', 'Sześć', 'Siedem', 'Osiem', 'Dziewięć', 'Dziesięć']
+
+/** "Cztery lokalizacje", "Pięć lokalizacji"… (feminine number words, digits above ten). */
+export function locationsPhrase(n) {
+  const noun = plural(n, ['lokalizacja', 'lokalizacje', 'lokalizacji'])
+  return `${NUMBER_WORDS[n] ?? n} ${noun}`
+}
+
 /** Polish plural: plural(3, ['studio', 'studia', 'studiów']) → 'studia'. */
 export function plural(n, [one, few, many]) {
   if (n === 1) return one

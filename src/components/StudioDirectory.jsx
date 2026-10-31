@@ -10,8 +10,8 @@ const gridVariants = {
 /**
  * Card widths for a centred, wrapping grid (widths match each breakpoint's gap):
  *  - mobile: one column · tablet and small laptops: two columns
- *  - desktop (≥1280px): three columns, so five studios sit 3 + 2 centred;
- *    exactly 4 studios keep a balanced 2 × 2 layout instead of 3 + 1.
+ *  - desktop: four studios form a balanced, centred 2 × 2 grid (current layout);
+ *    from 1280px, other counts use three columns (e.g. five → 3 + 2 centred).
  */
 function cardWidth(count) {
   const twoCol = 'md:w-[calc((100%-1.5rem)/2)] lg:w-[calc((100%-2rem)/2)]'

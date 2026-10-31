@@ -58,13 +58,14 @@ npm run qr       # regenerate QR codes → qr/
 All studio data lives in [src/data/studios.js](src/data/studios.js). Every published studio is shown
 immediately (no search or filters), and the cards, counts, map and footer update automatically.
 
-- Five confirmed locations: Wrocław Szczepin, Wrocław Swojczyce (website ends in **.com**; Szczepin's ends in **.pl**),
-  Wrocław Zwycięska, Bielany Wrocławskie (Facebook only) and Strzelin.
+- Four locations: Wrocław Szczepin, Wrocław Swojczyce (website ends in **.com**; Szczepin's ends in **.pl**),
+  Wrocław Zwycięska and Bielany Wrocławskie (Facebook only). The client asked on 2026-10-31 for the
+  Strzelin location to be removed from the website.
 - `published: false` hides an entry completely; incomplete entries stay hidden even when published.
 - Primary button: **Odwiedź stronę** when `website` is set, otherwise **Odwiedź Facebook**.
   Secondary button: **Wyznacz trasę** (Google Maps directions built from the street address).
-- Layout: one column on mobile, two on tablet; on desktop 3 + 2 centred
-  (a 4-studio list would switch to a balanced 2 × 2 grid).
+- Layout: one column on mobile, two on tablet, and a balanced, centred 2 × 2 grid on desktop for the four studios
+  (a five-studio list would switch to 3 + 2 centred).
 - Optional fields (`district`, `facebook`, `instagram`) can stay `null`; the UI hides what is missing.
 
 Only enter verified information.
@@ -82,7 +83,7 @@ Media is detected at build time, so the site never links to a file that does not
 | Hero photo (responsive) | `public/images/hero-poster-<w>x<h>.avif` + `.webp` | Several widths of one image (e.g. 768, 1200, 1536). Build-time detection creates the `srcset`, width/height and an `index.html` preload |
 | Hero photo (single file, alternative) | `public/images/hero-poster.webp` (or `.jpg`) | Used only when no sized variants exist |
 | Hero photo, mobile crop (optional) | `public/images/hero-poster-mobile.webp` | Only if the main photo cannot be cropped well for phones |
-| Studio photos | `public/images/studios/<id>.webp` (or `.jpg`) | `<id>` from studios.js: `wroclaw-szczepin.webp`, `wroclaw-swojczyce.webp`, `wroclaw-zwycieska.webp`, `bielany-wroclawskie.webp`, `strzelin.webp`. 1200×750 (16:10), < 200 KB |
+| Studio photos | `public/images/studios/<id>.webp` (or `.jpg`) | `<id>` from studios.js: `wroclaw-szczepin.webp`, `wroclaw-swojczyce.webp`, `wroclaw-zwycieska.webp`, `bielany-wroclawskie.webp`. 1200×750 (16:10), < 200 KB |
 
 **Current hero photo:** the selected campaign photograph `public/images/1.png` (1536×1024, 1.8 MB PNG, kept unchanged as the master).
 The site serves optimised copies generated from it: `hero-poster-{768x512,1200x800,1536x1024}.avif` (13 / 24 / 35 KB) and

@@ -1,5 +1,5 @@
 /**
- * Central list of Studio Figura locations — the five locations confirmed by the client.
+ * Central list of Studio Figura locations — the four locations confirmed by the client.
  *
  * Only add information that has been verified with the studio.
  * Leave optional fields as `null` — the UI hides anything that is missing.
@@ -67,18 +67,6 @@ export const studios = [
     facebook: 'https://www.facebook.com/share/1EzaXjEp3B/?mibextid=wwXIfr',
     instagram: null,
     coordinates: { lat: 51.034787, lng: 16.9626561 },
-  },
-  {
-    id: 'strzelin',
-    published: true,
-    name: 'Studio Figura Strzelin',
-    city: 'Strzelin',
-    district: null,
-    street: 'ul. Fabryczna 25',
-    website: 'https://studiofigurastrzelin.pl/',
-    facebook: null,
-    instagram: null,
-    coordinates: { lat: 50.77828, lng: 17.06487 },
   },
 ]
 
