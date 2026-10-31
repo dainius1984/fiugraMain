@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import { motion, useReducedMotion, useScroll, useTransform } from 'motion/react'
 import { ArrowDown } from 'lucide-react'
-import HeroMedia, { hasMobileHeroMedia } from './HeroMedia'
+import HeroMedia from './HeroMedia'
 import { EASE } from './Reveal'
 import { plural } from '../lib/studio-utils'
 
@@ -10,13 +10,13 @@ const LINES = [
   { words: ['Twoje', 'miejsce.'], className: 'italic text-brand-400' },
 ]
 
-export default function Hero({ studioCount }) {
+export default function Hero({ studioCount, places = [] }) {
   const ref = useRef(null)
   const reduceMotion = useReducedMotion()
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] })
-  const mediaY = useTransform(scrollYProgress, [0, 1], ['0%', '12%'])
-  const mediaScale = useTransform(scrollYProgress, [0, 1], [1.04, 1.14])
-  const contentY = useTransform(scrollYProgress, [0, 1], [0, -60])
+  // Restrained scroll response: the media drifts closer by a few percent, nothing more.
+  const mediaScale = useTransform(scrollYProgress, [0, 1], [1, 1.06])
+  const studiosLabel = plural(studioCount, ['studio', 'studia', 'studiów'])
 
   let wordIndex = 0
 
@@ -24,26 +24,61 @@ export default function Hero({ studioCount }) {
     <section
       ref={ref}
       aria-labelledby="hero-heading"
-      className="relative isolate overflow-hidden bg-ivory-100 pb-6 pt-28 text-ink-900 md:flex md:min-h-[min(100svh,980px)] md:items-center md:pb-16 md:pt-28"
+      className="relative isolate overflow-hidden bg-ivory-100 pb-10 pt-20 text-ink-900 md:pt-24 lg:flex lg:min-h-[min(100svh,960px)] lg:items-center lg:pb-16 lg:pt-28"
     >
-      {/* Quiet architectural line work behind the text */}
-      <svg
-        aria-hidden="true"
-        viewBox="0 0 400 400"
-        className="absolute -left-24 -top-10 -z-10 h-[420px] w-[420px] opacity-60 md:-left-40 md:h-[640px] md:w-[640px]"
-      >
-        {[0, 1, 2].map((i) => (
-          <circle key={i} cx="200" cy="200" r={110 + i * 42} fill="none" className="stroke-brand-300" strokeOpacity={0.28 - i * 0.07} strokeWidth="0.8" />
-        ))}
-      </svg>
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-7 px-5 sm:px-8 md:gap-10 lg:grid lg:grid-cols-12 lg:items-center lg:gap-12 lg:px-12">
+        {/* Media — campaign photo (or video when supplied), otherwise the natural-light artwork */}
+        <div className="relative lg:order-2 lg:col-span-6">
+          {/* Reserved box (fixed aspect ratio) → no layout shift while the photo loads */}
+          <motion.div
+            initial={reduceMotion ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1.4, ease: EASE, delay: 0.1 }}
+            className="group/hero relative aspect-[16/10] max-h-[34svh] w-full overflow-hidden rounded-[1.25rem] bg-ivory-200 md:aspect-[16/8] md:max-h-[40svh] lg:ml-auto lg:aspect-[4/5] lg:max-h-[min(76svh,720px)] lg:rounded-[2rem] lg:rounded-tl-[9rem]"
+          >
+            <motion.div className="absolute inset-0" style={reduceMotion ? undefined : { scale: mediaScale }}>
+              {/* Barely-there hover drift for mouse users */}
+              <div className="absolute inset-0 transition-transform duration-[1800ms] ease-luxe motion-reduce:transition-none [@media(hover:hover)]:group-hover/hero:scale-[1.025] motion-reduce:[@media(hover:hover)]:group-hover/hero:scale-100">
+                <motion.div
+                  className="absolute inset-0"
+                  initial={reduceMotion ? false : { scale: 1.08 }}
+                  animate={{ scale: 1 }}
+                  transition={{ duration: 2.4, ease: EASE, delay: 0.1 }}
+                >
+                  <HeroMedia />
+                </motion.div>
+              </div>
+            </motion.div>
+          </motion.div>
 
-      <div className="mx-auto grid w-full max-w-7xl items-center gap-10 px-5 sm:px-8 md:grid-cols-12 md:gap-8 lg:px-12">
-        <motion.div style={reduceMotion ? undefined : { y: contentY }} className="md:col-span-7">
+          {/* Offset orange hairline — editorial layering (desktop) */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 -z-10 hidden translate-x-5 translate-y-5 rounded-[2rem] rounded-tl-[9rem] border border-brand-300 lg:block"
+          />
+
+          {/* Floating caption: the factual "where" of the brand (desktop) */}
+          <motion.div
+            initial={reduceMotion ? false : { opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1.2, ease: EASE, delay: 1.2 }}
+            className="absolute -left-10 bottom-12 hidden max-w-[17rem] rounded-2xl bg-ivory-50/95 px-6 py-5 shadow-[0_24px_50px_-30px_rgba(23,23,23,0.35)] ring-1 ring-brand-200 backdrop-blur lg:block"
+          >
+            <p className="flex items-baseline gap-3">
+              <span className="font-serif text-5xl leading-none text-brand-400">{studioCount}</span>
+              <span className="eyebrow text-ink-900">{studiosLabel}</span>
+            </p>
+            <p className="mt-2 text-sm leading-snug text-ink-600">{places.join(' · ')}</p>
+          </motion.div>
+        </div>
+
+        {/* Copy */}
+        <div className="lg:order-1 lg:col-span-6">
           <motion.p
             initial={{ opacity: 0, letterSpacing: '0.6em' }}
             animate={{ opacity: 1, letterSpacing: '0.38em' }}
             transition={{ duration: 1.6, ease: EASE, delay: 0.2 }}
-            className="eyebrow mb-5 flex items-center gap-4 text-brand-600 md:mb-7"
+            className="eyebrow mb-4 flex items-center gap-4 text-brand-600 md:mb-6"
           >
             <span aria-hidden="true" className="h-px w-10 bg-brand-400" />
             Studio Figura
@@ -51,7 +86,7 @@ export default function Hero({ studioCount }) {
 
           <h1
             id="hero-heading"
-            className="font-serif text-[3.2rem] font-normal leading-[0.98] tracking-[-0.01em] sm:text-7xl md:text-[5.6rem] lg:text-[7.4rem]"
+            className="font-serif text-[3.2rem] font-normal leading-[0.98] tracking-[-0.01em] sm:text-7xl lg:text-[4.4rem] xl:text-[6.2rem]"
           >
             {LINES.map((line, li) => (
               <span key={li} className={`block ${line.className}`}>
@@ -63,7 +98,7 @@ export default function Hero({ studioCount }) {
                         className="inline-block"
                         initial={{ y: '105%', opacity: 0, filter: 'blur(8px)' }}
                         animate={{ y: '0%', opacity: 1, filter: 'blur(0px)' }}
-                        transition={{ duration: 1.3, ease: EASE, delay: 0.45 + i * 0.14 }}
+                        transition={{ duration: 1.2, ease: EASE, delay: 0.4 + i * 0.12 }}
                       >
                         {word}
                       </motion.span>
@@ -78,8 +113,8 @@ export default function Hero({ studioCount }) {
           <motion.p
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.2, ease: EASE, delay: 1.15 }}
-            className="mt-5 max-w-md text-[1.05rem] leading-relaxed text-ink-600 md:mt-8 md:text-lg"
+            transition={{ duration: 1.1, ease: EASE, delay: 1 }}
+            className="mt-4 max-w-md text-[1.05rem] leading-relaxed text-ink-600 md:mt-6 md:text-lg lg:mt-8"
           >
             Znajdź swoje Studio Figura i odkryj przestrzeń stworzoną z myślą o Tobie.
           </motion.p>
@@ -87,8 +122,8 @@ export default function Hero({ studioCount }) {
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.2, ease: EASE, delay: 1.35 }}
-            className="mt-7 flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6 md:mt-10"
+            transition={{ duration: 1.1, ease: EASE, delay: 1.15 }}
+            className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6 lg:mt-10"
           >
             <motion.a
               href="#studia"
@@ -105,36 +140,11 @@ export default function Hero({ studioCount }) {
               </span>
             </motion.a>
 
-            <p className="text-sm leading-relaxed text-ink-600 sm:max-w-[15rem]">
-              {studioCount} {plural(studioCount, ['studio', 'studia', 'studiów'])} — wybierz najbliższe i przejdź na jego stronę.
+            <p className="text-sm leading-relaxed text-ink-600 sm:max-w-[15rem] lg:hidden">
+              {studioCount} {studiosLabel} — wybierz najbliższe i przejdź na jego stronę.
             </p>
           </motion.div>
-        </motion.div>
-
-        {/* Arch-framed media: video / poster / built-in artwork */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.6, ease: EASE, delay: 0.3 }}
-          className={`relative md:col-span-5 ${hasMobileHeroMedia ? '' : 'hidden md:block'}`}
-        >
-          <div className="relative mx-auto aspect-[4/3] w-full overflow-hidden rounded-t-[999px] rounded-b-[1.5rem] ring-1 ring-brand-300/60 md:aspect-[4/5] md:max-w-[460px]">
-            <motion.div
-              className="absolute inset-0 will-change-transform"
-              style={reduceMotion ? undefined : { y: mediaY, scale: mediaScale }}
-              initial={reduceMotion ? false : { scale: 1.12 }}
-              animate={reduceMotion ? undefined : { scale: 1.04 }}
-              transition={{ duration: 2.8, ease: EASE }}
-            >
-              <HeroMedia />
-            </motion.div>
-          </div>
-          {/* Offset orange hairline for an editorial, layered feel */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 -z-10 mx-auto hidden translate-x-4 translate-y-4 rounded-t-[999px] rounded-b-[1.5rem] border border-brand-300/70 md:block md:max-w-[460px]"
-          />
-        </motion.div>
+        </div>
       </div>
     </section>
   )

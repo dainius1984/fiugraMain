@@ -14,13 +14,59 @@ const firstExisting = (candidates) => candidates.find(exists) ?? null
 
 const IMAGE_EXT = ['.webp', '.avif', '.jpg', '.jpeg', '.png']
 
+/**
+ * Responsive hero photo: public/images/hero-poster-<width>x<height>.{avif,webp}
+ * (several widths of the same image). Produces srcset strings, the largest WebP as the
+ * fallback src, and its intrinsic size for width/height attributes.
+ */
+function detectHeroPhoto() {
+  const dir = path.join(publicDir, 'images')
+  if (!fs.existsSync(dir)) return null
+  const variants = fs
+    .readdirSync(dir)
+    .map((file) => file.match(/^hero-poster-(\d+)x(\d+)\.(avif|webp)$/))
+    .filter(Boolean)
+    .map(([file, w, h, type]) => ({ url: `/images/${file}`, width: Number(w), height: Number(h), type }))
+    .sort((a, b) => a.width - b.width)
+  const webp = variants.filter((v) => v.type === 'webp')
+  if (webp.length === 0) return null
+  const srcset = (list) => list.map((v) => `${v.url} ${v.width}w`).join(', ')
+  const largest = webp.at(-1)
+  return {
+    avif: srcset(variants.filter((v) => v.type === 'avif')) || null,
+    webp: srcset(webp),
+    src: largest.url,
+    width: largest.width,
+    height: largest.height,
+  }
+}
+
+/**
+ * Rendered width of the hero photo, for the browser's srcset choice: the desktop frame is
+ * portrait (4:5, up to ~720px tall), so the 3:2 photo renders about 1.5× the frame height.
+ */
+const HERO_SIZES = '(min-width: 1024px) 1080px, calc(100vw - 2.5rem)'
+
 function detectHeroMedia() {
   return {
+    photo: detectHeroPhoto(),
+    sizes: HERO_SIZES,
     video: exists('videos/studio-figura-hero.mp4') ? '/videos/studio-figura-hero.mp4' : null,
     videoWebm: exists('videos/studio-figura-hero.webm') ? '/videos/studio-figura-hero.webm' : null,
     videoMobile: exists('videos/studio-figura-hero-mobile.mp4') ? '/videos/studio-figura-hero-mobile.mp4' : null,
     poster: firstExisting(IMAGE_EXT.map((ext) => `images/hero-poster${ext}`)),
+    posterMobile: firstExisting(IMAGE_EXT.map((ext) => `images/hero-poster-mobile${ext}`)),
   }
+}
+
+const LOGO_EXT = ['.svg', '.webp', '.png']
+
+/** Official logo files (only add authorised assets). The light variant is used on the dark footer. */
+function detectBrandLogo() {
+  const find = (name) => firstExisting(LOGO_EXT.map((ext) => `images/brand/${name}${ext}`))
+  const dark = find('studio-figura-logo')
+  const light = find('studio-figura-logo-light')
+  return { dark: dark && `/${dark}`, light: light && `/${light}` }
 }
 
 function detectStudioImages() {
@@ -41,13 +87,34 @@ function detectStudioImages() {
 
 const hero = detectHeroMedia()
 
+/** Preloads the hero photo from index.html so it starts downloading before the app script runs. */
+function heroPreload() {
+  return {
+    name: 'studio-figura-hero-preload',
+    transformIndexHtml() {
+      const photo = hero.photo
+      if (!photo) return []
+      const best = photo.avif ? { srcset: photo.avif, type: 'image/avif' } : { srcset: photo.webp, type: 'image/webp' }
+      return [
+        {
+          tag: 'link',
+          attrs: { rel: 'preload', as: 'image', imagesrcset: best.srcset, imagesizes: HERO_SIZES, type: best.type, fetchpriority: 'high' },
+          injectTo: 'head',
+        },
+      ]
+    },
+  }
+}
+
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [react(), tailwindcss(), heroPreload()],
   define: {
     __HERO_MEDIA__: JSON.stringify({
       ...hero,
       poster: hero.poster ? `/${hero.poster}` : null,
+      posterMobile: hero.posterMobile ? `/${hero.posterMobile}` : null,
     }),
+    __BRAND_LOGO__: JSON.stringify(detectBrandLogo()),
     __STUDIO_IMAGES__: JSON.stringify(detectStudioImages()),
   },
 })

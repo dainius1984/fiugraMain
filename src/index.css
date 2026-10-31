@@ -7,9 +7,33 @@
 @import '@fontsource-variable/manrope/wght.css';
 @import 'tailwindcss';
 
+/*
+ * Metric-matched fallbacks for Cormorant Garamond: while the web font loads, Times New Roman is
+ * scaled to Cormorant's width and vertical metrics, so the hero headline does not re-wrap or jump
+ * when the real font swaps in (prevents layout shift). Values measured against Cormorant 400.
+ */
+@font-face {
+  font-family: 'Cormorant Fallback';
+  src: local('Times New Roman'), local('TimesNewRomanPSMT'), local('Times');
+  size-adjust: 95.5%;
+  ascent-override: 96.3%;
+  descent-override: 30.4%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Cormorant Fallback';
+  font-style: italic;
+  src: local('Times New Roman Italic'), local('TimesNewRomanPS-ItalicMT'), local('Times-Italic');
+  size-adjust: 86.9%;
+  ascent-override: 105.9%;
+  descent-override: 33.4%;
+  line-gap-override: 0%;
+}
+
 /* `static` emits every token, including ones used only from inline SVG styles. */
 @theme static {
-  --font-serif: 'Cormorant Garamond', 'Times New Roman', serif;
+  --font-serif: 'Cormorant Garamond', 'Cormorant Fallback', 'Times New Roman', serif;
   --font-sans: 'Manrope Variable', ui-sans-serif, system-ui, sans-serif;
 
   /* Ink — charcoal / black (text, dark surfaces) */
@@ -245,4 +269,27 @@
 .sf-map .leaflet-control-attribution {
   font-size: 10px;
   background: rgb(255 255 255 / 0.8);
+}
+
+/* Hero artwork: the palm shadow sways like leaves in a light breeze. */
+@keyframes sway {
+  0%,
+  100% {
+    transform: rotate(0deg) translate3d(0, 0, 0);
+  }
+  50% {
+    transform: rotate(1.6deg) translate3d(-6px, 4px, 0);
+  }
+}
+
+.hero-sway {
+  transform-box: fill-box;
+  transform-origin: 100% 0;
+  animation: sway 14s var(--ease-luxe) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-sway {
+    animation: none;
+  }
 }

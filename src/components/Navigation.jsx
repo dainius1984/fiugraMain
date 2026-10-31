@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, useMotionValueEvent, useScroll } from 'motion/react'
-import Wordmark from './Wordmark'
+import BrandLogo from './BrandLogo'
 import { EASE } from './Reveal'
 
 const LINKS = [
@@ -37,7 +37,7 @@ export default function Navigation() {
         className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-8 md:h-20 lg:px-12"
       >
         <a href="#top" aria-label="Studio Figura — początek strony" className="py-2">
-          <Wordmark className="text-[0.95rem] md:text-lg" />
+          <BrandLogo className="text-[1.4rem] md:text-[1.7rem]" />
         </a>
 
         <ul className="hidden items-center gap-10 md:flex">

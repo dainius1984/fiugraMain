@@ -1,5 +1,5 @@
 import { ArrowUpRight } from 'lucide-react'
-import Wordmark from './Wordmark'
+import BrandLogo from './BrandLogo'
 import { site } from '../data/site'
 import { fullAddress, primaryLink } from '../lib/studio-utils'
 
@@ -10,7 +10,7 @@ export default function Footer({ studios }) {
       <div className="mx-auto max-w-7xl px-5 pb-10 pt-16 sm:px-8 md:pt-24 lg:px-12">
         <div className="grid gap-12 md:grid-cols-[1.2fr_2fr]">
           <div>
-            <Wordmark className="text-xl md:text-2xl" />
+            <BrandLogo tone="light" className="text-[1.9rem] md:text-[2.2rem]" />
             <p className="mt-5 font-serif text-2xl italic text-brand-400">Twoje piękno. Twoje miejsce.</p>
           </div>
 

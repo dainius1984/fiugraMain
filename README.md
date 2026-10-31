@@ -78,16 +78,30 @@ Media is detected at build time, so the site never links to a file that does not
 | --- | --- | --- |
 | Hero video (desktop) | `public/videos/studio-figura-hero.mp4` | H.264, 1920×1080 or less, 8–15 s seamless loop, no audio, ideally < 4 MB |
 | Hero video, WebM (optional) | `public/videos/studio-figura-hero.webm` | VP9, offered first to browsers that support it |
-| Hero video, mobile (optional) | `public/videos/studio-figura-hero-mobile.mp4` | Portrait 720×1280, < 2 MB. Without it, phones show the still image (faster for QR visitors) |
-| Hero poster / still | `public/images/hero-poster.webp` (or `.jpg`) | ~1920×1080, < 250 KB. Shown in the hero's arch frame before the video loads. When present, phones also show the frame |
+| Hero video, mobile (optional) | `public/videos/studio-figura-hero-mobile.mp4` | Landscape 1280×800, < 2 MB (phones show the media as a 16:10 band). Without it, phones show the still image |
+| Hero photo (responsive) | `public/images/hero-poster-<w>x<h>.avif` + `.webp` | Several widths of one image (e.g. 768, 1200, 1536). Build-time detection creates the `srcset`, width/height and an `index.html` preload |
+| Hero photo (single file, alternative) | `public/images/hero-poster.webp` (or `.jpg`) | Used only when no sized variants exist |
+| Hero photo, mobile crop (optional) | `public/images/hero-poster-mobile.webp` | Only if the main photo cannot be cropped well for phones |
 | Studio photos | `public/images/studios/<id>.webp` (or `.jpg`) | `<id>` from studios.js: `wroclaw-szczepin.webp`, `wroclaw-swojczyce.webp`, `wroclaw-zwycieska.webp`, `bielany-wroclawskie.webp`, `strzelin.webp`. 1200×750 (16:10), < 200 KB |
 
-Without media, the hero uses built-in brand artwork, and each card gets its own distinct illustrative artwork (clearly abstract, not a photo of the location).
+**Current hero photo:** the selected campaign photograph `public/images/1.png` (1536×1024, 1.8 MB PNG, kept unchanged as the master).
+The site serves optimised copies generated from it: `hero-poster-{768x512,1200x800,1536x1024}.avif` (13 / 24 / 35 KB) and
+`.webp` (20 / 37 / 53 KB). Browsers download exactly one, typically the 1200 px AVIF, and never the PNG.
+To replace the photo, regenerate the variants from the new master (any image tool, keeping the `-<w>x<h>` names).
+Delete the variants to fall back to the built-in "natural light" artwork. A video, if added, plays over the photo.
+The crop focus for hero photos and videos is `MEDIA_FOCUS` in `src/components/HeroMedia.jsx` (currently `35% 22%`).
+
+Without media, the hero uses the built-in artwork (warm light and a palm-leaf shadow). Each card gets its own distinct
+illustration, clearly abstract and not a photo of the location. Only add a studio photo that really shows that branch:
+cards present it as that studio. Photos fade in once loaded, inside a reserved 16:10 box, so nothing shifts.
 Video never loads for visitors with *reduced motion* or *data saver* enabled.
 Use only footage and photos you have rights to.
 
-**Logo:** the wordmark in [src/components/Wordmark.jsx](src/components/Wordmark.jsx) is typographic.
-Swap it for the official Studio Figura logo once an authorised asset is supplied.
+**Logo:** [src/components/BrandLogo.jsx](src/components/BrandLogo.jsx) is used in the navigation and footer.
+Add the official, authorised logo as `public/images/brand/studio-figura-logo.svg` (or `.webp` / `.png` with transparency).
+Add `studio-figura-logo-light.*` for the dark footer. Both are picked up automatically at build time and shown undistorted
+at the wordmark's height. Until then, the temporary typographic lockup in
+[src/components/Wordmark.jsx](src/components/Wordmark.jsx) is shown. It is not the official logo.
 
 ## Map
 

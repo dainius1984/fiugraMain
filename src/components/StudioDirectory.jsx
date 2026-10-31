@@ -8,15 +8,15 @@ const gridVariants = {
 }
 
 /**
- * Card widths for a centred, wrapping grid:
- *  - mobile: one column · tablet: two columns
- *  - desktop: three columns (5 studios → 3 + 2 centred);
- *    exactly 4 studios use a balanced 2 × 2 layout instead of 3 + 1.
+ * Card widths for a centred, wrapping grid (widths match each breakpoint's gap):
+ *  - mobile: one column · tablet and small laptops: two columns
+ *  - desktop (≥1280px): three columns, so five studios sit 3 + 2 centred;
+ *    exactly 4 studios keep a balanced 2 × 2 layout instead of 3 + 1.
  */
 function cardWidth(count) {
-  const tablet = 'md:w-[calc((100%-1.5rem)/2)]'
-  if (count === 4 || count <= 2) return `w-full ${tablet} lg:w-[calc((100%-1.75rem)/2)]`
-  return `w-full ${tablet} lg:w-[calc((100%-2*1.75rem)/3)]`
+  const twoCol = 'md:w-[calc((100%-1.5rem)/2)] lg:w-[calc((100%-2rem)/2)]'
+  if (count === 4 || count <= 2) return `w-full ${twoCol}`
+  return `w-full ${twoCol} xl:w-[calc((100%-2*2rem)/3)]`
 }
 
 export default function StudioDirectory({ studios }) {
@@ -24,7 +24,7 @@ export default function StudioDirectory({ studios }) {
 
   return (
     <section id="studia" aria-labelledby="studia-heading" className="relative bg-ivory-100 py-14 md:py-28">
-      <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-12">
+      <div className="mx-auto max-w-[84rem] px-5 sm:px-8 lg:px-12">
         <div className="mx-auto max-w-2xl text-center">
           <Reveal>
             <h2
@@ -49,7 +49,7 @@ export default function StudioDirectory({ studios }) {
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, amount: 0.08 }}
-          className={`mx-auto mt-10 flex flex-wrap justify-center gap-5 md:mt-14 md:gap-6 lg:gap-7 ${
+          className={`mx-auto mt-10 flex flex-wrap justify-center gap-5 md:mt-14 md:gap-6 lg:gap-8 ${
             balanced ? 'max-w-5xl' : ''
           }`}
         >

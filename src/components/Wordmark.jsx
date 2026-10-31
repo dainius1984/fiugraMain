@@ -1,10 +1,29 @@
-/** Typographic wordmark — replace with the official logo once an authorised asset is supplied. */
-export default function Wordmark({ className = '' }) {
+/**
+ * Temporary typographic wordmark: a centred, stacked "STUDIO / FIGURA" lockup.
+ * It is not the official logo. <BrandLogo> replaces it automatically once an
+ * authorised logo file is added to /public/images/brand/.
+ * Size it with a font-size class (e.g. `text-2xl`); everything scales in em.
+ */
+export default function Wordmark({ tone = 'dark', className = '' }) {
+  const light = tone === 'light'
   return (
-    <span className={`inline-flex items-baseline gap-[0.45em] font-serif leading-none ${className}`}>
-      <span className="tracking-[0.34em]">STUDIO</span>
-      <span aria-hidden="true" className="h-[0.28em] w-[0.28em] -translate-y-[0.12em] rotate-45 bg-brand-400" />
-      <span className="tracking-[0.34em]">FIGURA</span>
+    <span role="img" aria-label="Studio Figura" className={`inline-flex flex-col items-center leading-none ${className}`}>
+      <span
+        aria-hidden="true"
+        className={`mr-[-0.72em] font-sans text-[0.4em] font-semibold tracking-[0.72em] ${
+          light ? 'text-brand-400' : 'text-brand-600'
+        }`}
+      >
+        STUDIO
+      </span>
+      <span
+        aria-hidden="true"
+        className={`mr-[-0.16em] mt-[0.16em] font-serif font-medium tracking-[0.16em] ${
+          light ? 'text-ivory-50' : 'text-ink-900'
+        }`}
+      >
+        FIGURA
+      </span>
     </span>
   )
 }

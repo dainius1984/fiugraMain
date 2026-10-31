@@ -21,7 +21,7 @@ export default function ExistingSite() {
       </a>
       <Navigation />
       <main id="top">
-        <Hero studioCount={studios.length} />
+        <Hero studioCount={studios.length} places={places} />
         <StudioDirectory studios={studios} />
         <StudioMap studios={studios} />
         <BrandStatement studioCount={studios.length} places={places} />

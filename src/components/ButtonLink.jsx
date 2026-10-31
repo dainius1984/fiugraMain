@@ -1,7 +1,7 @@
 import { motion } from 'motion/react'
 
 const base =
-  'group/btn relative isolate inline-flex min-h-14 items-center justify-center gap-2.5 overflow-hidden rounded-full px-6 text-[0.8rem] font-semibold uppercase tracking-[0.16em] transition-colors duration-500 ease-luxe'
+  'group/btn relative isolate inline-flex min-h-14 items-center justify-center gap-2.5 overflow-hidden rounded-full px-6 text-[0.8rem] font-semibold lg:text-[0.84rem] uppercase tracking-[0.16em] transition-colors duration-500 ease-luxe'
 
 const variants = {
   brand: 'bg-brand-600 text-ivory-50 hover:text-ivory-50',
