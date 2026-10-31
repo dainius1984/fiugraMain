@@ -34,7 +34,7 @@ export default function StudioCard({ studio, index, className = '' }) {
         rel="noopener noreferrer"
         tabIndex={-1}
         aria-hidden="true"
-        className="relative block aspect-[16/10] overflow-hidden bg-ivory-200"
+        className="relative block aspect-[16/10] overflow-hidden bg-ivory-200 xl:aspect-[16/9]"
       >
         <div className="absolute inset-0 transition-transform duration-[1400ms] ease-luxe group-hover/card:scale-[1.06]">
           {image ? (
@@ -56,17 +56,17 @@ export default function StudioCard({ studio, index, className = '' }) {
 
       <span aria-hidden="true" className="h-px bg-gradient-to-r from-transparent via-brand-300/80 to-transparent" />
 
-      <div className="flex flex-1 flex-col p-6 sm:p-7 lg:p-8 xl:px-9">
+      <div className="flex flex-1 flex-col p-6 sm:p-7 lg:p-8 xl:p-9">
         {/* Orange rule that extends on hover */}
         <span
           aria-hidden="true"
           className="mb-4 block h-px w-10 bg-brand-400 transition-[width] duration-700 ease-luxe group-hover/card:w-20"
         />
-        <h3 id={headingId} className="font-serif text-[1.75rem] font-medium leading-[1.08] text-ink-900 sm:text-[1.9rem] xl:text-[2.05rem]">
+        <h3 id={headingId} className="font-serif text-[1.75rem] font-medium leading-[1.08] text-ink-900 sm:text-[1.9rem] xl:text-[2.25rem]">
           {studio.name}
         </h3>
 
-        <address className="mt-4 flex items-start gap-3 text-[1.08rem] not-italic leading-snug lg:text-[1.15rem]">
+        <address className="mt-4 flex items-start gap-3 text-[1.08rem] not-italic leading-snug lg:text-[1.15rem] xl:text-[1.25rem]">
           <MapPin
             className="mt-[0.2rem] size-[1.15rem] shrink-0 text-brand-400 transition-colors duration-700 group-hover/card:text-brand-600"
             strokeWidth={1.75}

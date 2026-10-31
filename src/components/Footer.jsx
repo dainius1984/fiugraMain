@@ -7,7 +7,7 @@ export default function Footer({ studios }) {
   const year = new Date().getFullYear()
   return (
     <footer className="bg-ink-950 text-ivory-100">
-      <div className="mx-auto max-w-7xl px-5 pb-10 pt-16 sm:px-8 md:pt-24 lg:px-12">
+      <div className="container-site pb-10 pt-16 md:pt-24">
         <div className="grid gap-12 md:grid-cols-[1.2fr_2fr]">
           <div>
             <BrandLogo tone="light" className="text-[1.9rem] md:text-[2.2rem]" />

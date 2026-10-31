@@ -26,15 +26,15 @@ export default function Hero({ studioCount, places = [] }) {
       aria-labelledby="hero-heading"
       className="relative isolate overflow-hidden bg-ivory-100 pb-10 pt-20 text-ink-900 md:pt-24 lg:flex lg:min-h-[min(100svh,960px)] lg:items-center lg:pb-16 lg:pt-28"
     >
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-7 px-5 sm:px-8 md:gap-10 lg:grid lg:grid-cols-12 lg:items-center lg:gap-12 lg:px-12">
+      <div className="container-site flex flex-col gap-7 md:gap-10 lg:grid lg:grid-cols-2 lg:items-center lg:gap-12 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] xl:gap-16">
         {/* Media — campaign photo (or video when supplied), otherwise the natural-light artwork */}
-        <div className="relative lg:order-2 lg:col-span-6">
+        <div className="relative lg:order-2">
           {/* Reserved box (fixed aspect ratio) → no layout shift while the photo loads */}
           <motion.div
             initial={reduceMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1.4, ease: EASE, delay: 0.1 }}
-            className="group/hero relative aspect-[16/10] max-h-[34svh] w-full overflow-hidden rounded-[1.25rem] bg-ivory-200 md:aspect-[16/8] md:max-h-[40svh] lg:ml-auto lg:aspect-[4/5] lg:max-h-[min(76svh,720px)] lg:rounded-[2rem] lg:rounded-tl-[9rem]"
+            className="group/hero relative aspect-[16/10] max-h-[34svh] w-full overflow-hidden rounded-[1.25rem] bg-ivory-200 md:aspect-[16/8] md:max-h-[40svh] lg:ml-auto lg:aspect-[4/5] lg:max-h-[min(76svh,720px)] xl:max-h-[min(80svh,820px)] lg:rounded-[2rem] lg:rounded-tl-[9rem]"
           >
             <motion.div className="absolute inset-0" style={reduceMotion ? undefined : { scale: mediaScale }}>
               {/* Barely-there hover drift for mouse users */}
@@ -73,7 +73,7 @@ export default function Hero({ studioCount, places = [] }) {
         </div>
 
         {/* Copy */}
-        <div className="lg:order-1 lg:col-span-6">
+        <div className="lg:order-1">
           <motion.p
             initial={{ opacity: 0, letterSpacing: '0.6em' }}
             animate={{ opacity: 1, letterSpacing: '0.38em' }}
@@ -86,10 +86,10 @@ export default function Hero({ studioCount, places = [] }) {
 
           <h1
             id="hero-heading"
-            className="font-serif text-[3.2rem] font-normal leading-[0.98] tracking-[-0.01em] sm:text-7xl lg:text-[4.4rem] xl:text-[6.2rem]"
+            className="font-serif text-[3.2rem] font-normal leading-[0.98] tracking-[-0.01em] sm:text-7xl lg:text-[4.4rem] xl:text-[5.8rem]"
           >
             {LINES.map((line, li) => (
-              <span key={li} className={`block ${line.className}`}>
+              <span key={li} className={`block whitespace-nowrap ${line.className}`}>
                 {line.words.map((word) => {
                   const i = wordIndex++
                   return (

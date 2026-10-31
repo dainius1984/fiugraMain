@@ -271,6 +271,53 @@
   background: rgb(255 255 255 / 0.8);
 }
 
+/*
+ * Shared desktop container: 1240px of content (83.5rem minus 3rem side padding on each side),
+ * with the standard mobile/tablet padding below. The card grid uses a slightly wider variant.
+ */
+@utility container-site {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 83.5rem;
+  padding-inline: 1.25rem;
+  @media (width >= 40rem) {
+    padding-inline: 2rem;
+  }
+  @media (width >= 64rem) {
+    padding-inline: 3rem;
+  }
+}
+
+@utility container-wide {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 88rem;
+  padding-inline: 1.25rem;
+  @media (width >= 40rem) {
+    padding-inline: 2rem;
+  }
+  @media (width >= 64rem) {
+    padding-inline: 3rem;
+  }
+}
+
+/*
+ * Large monitors: scale the whole rem-based system (type, spacing, containers) up gently so
+ * the layout does not look small at 1920px+. Breakpoints are unaffected (media queries use
+ * the browser default size), and phones/tablets/laptops stay exactly as they are.
+ */
+@media (min-width: 1700px) {
+  html {
+    font-size: 106.25%;
+  }
+}
+
+@media (min-width: 2200px) {
+  html {
+    font-size: 112.5%;
+  }
+}
+
 /* Hero artwork: the palm shadow sways like leaves in a light breeze. */
 @keyframes sway {
   0%,

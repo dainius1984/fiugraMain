@@ -96,6 +96,11 @@ export default function StudioMap({ studios }) {
         })
       }
 
+      // Keep Leaflet in sync with its container (window resizes, breakpoint and font-scale changes).
+      const resizeObserver = new ResizeObserver(() => map.invalidateSize({ pan: false }))
+      resizeObserver.observe(mapEl.current)
+      map.once('unload', () => resizeObserver.disconnect())
+
       mapRef.current = map
       setReady(true)
     }
@@ -165,7 +170,7 @@ export default function StudioMap({ studios }) {
       aria-labelledby="mapa-heading"
       className="border-t border-brand-300/50 bg-ivory-50 py-16 md:py-28"
     >
-      <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-12">
+      <div className="container-site">
         <div className="mx-auto max-w-2xl text-center">
           <Reveal>
             <h2 id="mapa-heading" className="font-serif text-[2.4rem] leading-[1.02] text-ink-900 sm:text-6xl">
@@ -179,7 +184,7 @@ export default function StudioMap({ studios }) {
           </Reveal>
         </div>
 
-        <div className="mt-10 grid gap-6 md:mt-14 lg:grid-cols-[minmax(0,4fr)_minmax(0,8fr)] lg:gap-10">
+        <div className="mt-10 grid gap-6 md:mt-14 lg:grid-cols-[minmax(0,35fr)_minmax(0,65fr)] lg:gap-10 xl:gap-12">
           <Reveal delay={0.12} className="order-2 lg:order-1">
             <ol className="divide-y divide-brand-300/50 border-y border-brand-300/50" aria-label="Lokalizacje na mapie">
               {located.map((studio, i) => {
@@ -237,7 +242,7 @@ export default function StudioMap({ studios }) {
                 ref={mapEl}
                 role="region"
                 aria-label="Mapa lokalizacji Studio Figura"
-                className="sf-map h-[520px] w-full bg-ivory-200 lg:h-[600px]"
+                className="sf-map h-[520px] w-full bg-ivory-200 lg:h-[620px] xl:h-[680px]"
               />
               {!ready && (
                 <div className="pointer-events-none absolute inset-0 grid place-items-center text-sm text-ink-600">

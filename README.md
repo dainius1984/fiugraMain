@@ -128,6 +128,8 @@ Every colour is a token in `src/index.css` (`@theme static`, so tokens used only
   - `brand-600` `#B4441A` is for small orange text on light backgrounds and for fills behind white text (WCAG AA).
   - `brand-50`…`brand-300` are light tints for hairlines, hover washes and illustration line work.
 
+**Layout:** sections share the `container-site` utility (1240px of content on desktop). The card grid uses the slightly wider `container-wide` (1312px). From 1700px the root font size scales up by 6.25%, and from 2200px by 12.5%, so large monitors keep the same proportions. Both utilities are in `src/index.css`.
+
 Orange stays an accent and never fills whole sections. Black is reserved for buttons, map markers and the footer.
 The favicon (`public/favicon.svg`) is a static file, so it repeats `#E05A22` directly.
 

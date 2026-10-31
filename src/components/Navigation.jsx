@@ -34,18 +34,18 @@ export default function Navigation() {
     >
       <nav
         aria-label="Główna nawigacja"
-        className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-8 md:h-20 lg:px-12"
+        className="container-site flex h-16 items-center justify-between md:h-20"
       >
         <a href="#top" aria-label="Studio Figura — początek strony" className="py-2">
-          <BrandLogo className="text-[1.4rem] md:text-[1.7rem]" />
+          <BrandLogo className="text-[1.4rem] md:text-[1.7rem] xl:text-[1.9rem]" />
         </a>
 
-        <ul className="hidden items-center gap-10 md:flex">
+        <ul className="hidden items-center gap-10 md:flex xl:gap-12">
           {LINKS.map((link) => (
             <li key={link.href}>
               <a
                 href={link.href}
-                className="group relative py-2 text-[0.75rem] font-medium uppercase tracking-[0.22em] opacity-80 transition-opacity duration-500 hover:opacity-100"
+                className="group relative py-2 text-[0.75rem] font-medium xl:text-[0.8rem] uppercase tracking-[0.22em] opacity-80 transition-opacity duration-500 hover:opacity-100"
               >
                 {link.label}
                 <span className="absolute -bottom-0.5 left-0 h-px w-full origin-right scale-x-0 bg-brand-400 transition-transform duration-500 ease-luxe group-hover:origin-left group-hover:scale-x-100" />
@@ -56,7 +56,7 @@ export default function Navigation() {
 
         <a
           href="#studia"
-          className="inline-flex min-h-11 items-center rounded-full bg-ink-900 px-5 text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-ivory-50 transition-colors duration-500 ease-luxe hover:bg-brand-600"
+          className="inline-flex min-h-11 items-center rounded-full bg-ink-900 px-5 text-[0.7rem] xl:min-h-12 xl:px-6 xl:text-[0.75rem] font-semibold uppercase tracking-[0.2em] text-ivory-50 transition-colors duration-500 ease-luxe hover:bg-brand-600"
         >
           <span className="md:hidden">Studia</span>
           <span className="hidden md:inline">Znajdź studio</span>

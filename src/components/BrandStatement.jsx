@@ -7,7 +7,7 @@ const STATEMENT =
   'Piękno zaczyna się od chwili tylko dla siebie — w miejscu, w którym możesz zwolnić, odetchnąć i poczuć się dobrze.'
 
 function Word({ children, progress, range, still }) {
-  const opacity = useTransform(progress, range, [0.16, 1])
+  const opacity = useTransform(progress, range, [0.2, 1])
   return (
     <motion.span style={still ? undefined : { opacity }} className="inline-block">
       {children}
@@ -19,7 +19,7 @@ function Word({ children, progress, range, still }) {
 export default function BrandStatement({ studioCount, places }) {
   const ref = useRef(null)
   const reduceMotion = useReducedMotion()
-  const { scrollYProgress } = useScroll({ target: ref, offset: ['start 0.85', 'end 0.55'] })
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start 0.9', 'center 0.55'] })
   const words = STATEMENT.split(' ')
 
   const glowY = useTransform(scrollYProgress, [0, 1], ['-10%', '20%'])
@@ -36,13 +36,13 @@ export default function BrandStatement({ studioCount, places }) {
         className="absolute -right-1/4 top-0 -z-10 h-[120%] w-[80%] rounded-full bg-[radial-gradient(circle,color-mix(in_srgb,var(--color-brand-200)_55%,transparent)_0%,transparent_65%)] blur-2xl"
       />
 
-      <div className="mx-auto max-w-6xl px-5 sm:px-8 lg:px-12">
+      <div className="container-site">
         <Reveal as="p" className="eyebrow mb-8 flex items-center gap-4 text-brand-600 md:mb-12">
           <span aria-hidden="true" className="h-px w-10 bg-brand-400" />
           <span id="o-nas-heading">Studio Figura</span>
         </Reveal>
 
-        <p ref={ref} className="font-serif text-[2rem] leading-[1.15] text-ink-900 sm:text-5xl md:text-6xl lg:text-[4.4rem]">
+        <p ref={ref} className="max-w-[66rem] font-serif text-[2rem] leading-[1.15] text-ink-900 sm:text-5xl md:text-6xl lg:text-[4.4rem]">
           {words.map((word, i) => (
             <Word
               key={i}

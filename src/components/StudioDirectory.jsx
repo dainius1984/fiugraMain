@@ -24,7 +24,7 @@ export default function StudioDirectory({ studios }) {
 
   return (
     <section id="studia" aria-labelledby="studia-heading" className="relative bg-ivory-100 py-14 md:py-28">
-      <div className="mx-auto max-w-[84rem] px-5 sm:px-8 lg:px-12">
+      <div className="container-wide">
         <div className="mx-auto max-w-2xl text-center">
           <Reveal>
             <h2
