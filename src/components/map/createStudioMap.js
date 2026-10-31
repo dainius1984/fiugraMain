@@ -40,9 +40,10 @@ export function webgl2Supported() {
 /**
  * @param {HTMLElement} container
  * @param {{ studios: object[], reduceMotion: boolean, isCompact: () => boolean,
- *           onSelect: (id: string) => void, onReady: () => void }} options
+ *           onSelect: (id: string, trigger: HTMLElement) => void,
+ *           onReady: () => void, onError?: (error: Error) => void }} options
  */
-export function createStudioMap(container, { studios, reduceMotion, isCompact, onSelect, onReady }) {
+export function createStudioMap(container, { studios, reduceMotion, isCompact, onSelect, onReady, onError }) {
   const located = studios.filter((s) => s.coordinates)
   const bounds = located.reduce((b, s) => b.extend(toLngLat(s.coordinates)), new LngLatBounds())
 
@@ -55,7 +56,7 @@ export function createStudioMap(container, { studios, reduceMotion, isCompact, o
     style: STYLE_URL,
     bounds,
     // Start slightly wider, then settle onto the studios (skipped for reduced motion).
-    fitBoundsOptions: { padding: reduceMotion ? fitPadding() : scalePadding(fitPadding(), 2.2) },
+    fitBoundsOptions: { padding: reduceMotion ? fitPadding() : scalePadding(fitPadding(), 2.2), absolutePadding: true },
     attributionControl: false,
     cooperativeGestures: true,
     dragRotate: false,
@@ -65,6 +66,8 @@ export function createStudioMap(container, { studios, reduceMotion, isCompact, o
     minZoom: 6,
     maxZoom: 18,
     locale: LOCALE,
+    // The observer below owns resize/refit ordering.
+    trackResize: false,
   })
   map.touchZoomRotate.disableRotation()
   map.keyboard.disableRotation()
@@ -74,6 +77,11 @@ export function createStudioMap(container, { studios, reduceMotion, isCompact, o
   map.addControl(new AttributionControl({ compact: false }), 'bottom-left')
 
   const markers = new globalThis.Map()
+  let destroyed = false
+  let ready = false
+  let resizeFrame = 0
+  let resizeTimer
+  let errorTimer
 
   located.forEach((studio, index) => {
     const el = document.createElement('button')
@@ -83,37 +91,80 @@ export function createStudioMap(container, { studios, reduceMotion, isCompact, o
     el.setAttribute('aria-pressed', 'false')
     el.style.setProperty('--sf-mk-delay', reduceMotion ? '0ms' : `${250 + index * 110}ms`)
     el.innerHTML = `<span class="sf-mk__dot" aria-hidden="true">${pad2(index + 1)}</span><span class="sf-mk__tip" aria-hidden="true">${shortName(studio.name)}</span>`
-    el.addEventListener('click', (event) => {
+    const select = (event) => {
       event.stopPropagation()
-      onSelect(studio.id)
-    })
+      onSelect(studio.id, el)
+    }
+    el.addEventListener('click', select)
     const marker = new Marker({ element: el, anchor: 'center' }).setLngLat(toLngLat(studio.coordinates))
-    markers.set(studio.id, { marker, el, studio })
+    markers.set(studio.id, { marker, el, studio, select })
   })
 
-  // "Pristine" = the visitor has not panned/zoomed since the last overview, so a resize may refit.
-  let pristine = true
   let activeId = null
-  map.on('movestart', (event) => {
-    if (event.originalEvent) pristine = false
+
+  const overview = (duration = 0) => map.fitBounds(bounds, {
+    padding: fitPadding(), absolutePadding: true, duration, essential: true,
   })
+  const focusedCamera = (id) => {
+    const entry = markers.get(id)
+    return entry && { center: toLngLat(entry.studio.coordinates), zoom: 14.5, padding: focusPadding() }
+  }
+  const refit = () => {
+    if (destroyed || !ready || !container.clientWidth || !container.clientHeight) return
+    map.stop()
+    const target = focusedCamera(activeId)
+    if (target) map.jumpTo(target)
+    else overview()
+  }
 
   // Keep the canvas in sync with layout changes (breakpoints, font scaling, late fonts).
   const resizeObserver = new ResizeObserver(() => {
-    map.resize()
-    if (pristine && !activeId && map.loaded()) map.fitBounds(bounds, { padding: fitPadding(), duration: 0 })
+    cancelAnimationFrame(resizeFrame)
+    resizeFrame = requestAnimationFrame(() => {
+      if (!destroyed) map.resize()
+    })
+    clearTimeout(resizeTimer)
+    // Camera calculations do not depend on pending tile requests or map.loaded().
+    resizeTimer = setTimeout(refit, 150)
   })
   resizeObserver.observe(container)
 
-  map.once('load', () => {
+  const fail = (error) => {
+    if (destroyed) return
+    clearTimeout(errorTimer)
+    onError?.(error)
+  }
+  const handleError = ({ error, sourceId }) => {
+    // A failed style cannot initialize. Individual tile errors get a recovery window
+    // so a transient request does not immediately remove an otherwise usable map.
+    if (!ready && (error?.url === STYLE_URL || (!sourceId && !map.getStyle()?.layers?.length))) {
+      fail(error)
+      return
+    }
+    if (!errorTimer) errorTimer = setTimeout(() => fail(error), 4000)
+  }
+  const handleSourceData = (event) => {
+    if (event.tile?.state === 'loaded') {
+      clearTimeout(errorTimer)
+      errorTimer = undefined
+    }
+  }
+  map.on('error', handleError)
+  map.on('sourcedata', handleSourceData)
+
+  const handleLoad = () => {
+    if (destroyed) return
+    ready = true
     warmUpStyle(map)
     markers.forEach(({ marker, el }) => {
       marker.addTo(map)
       el.classList.add('is-in') // staggered reveal via --sf-mk-delay
     })
-    if (!reduceMotion) map.fitBounds(bounds, { padding: fitPadding(), duration: 1100, essential: true })
+    map.resize()
+    overview(reduceMotion ? 0 : 1100)
     onReady()
-  })
+  }
+  map.once('load', handleLoad)
 
   return {
     setActive(id) {
@@ -125,9 +176,8 @@ export function createStudioMap(container, { studios, reduceMotion, isCompact, o
       })
     },
     focus(id) {
-      const entry = markers.get(id)
-      if (!entry) return
-      const target = { center: toLngLat(entry.studio.coordinates), zoom: 14.5, padding: focusPadding() }
+      const target = focusedCamera(id)
+      if (!target || destroyed) return
       if (reduceMotion) {
         map.jumpTo(target)
         return
@@ -139,12 +189,23 @@ export function createStudioMap(container, { studios, reduceMotion, isCompact, o
       map.flyTo({ ...target, duration, curve: 1.2, essential: true })
     },
     showAll() {
-      pristine = true
-      map.fitBounds(bounds, { padding: fitPadding(), duration: reduceMotion ? 0 : 800, essential: true })
+      activeId = null
+      if (ready && !destroyed) overview(reduceMotion ? 0 : 800)
     },
     destroy() {
+      if (destroyed) return
+      destroyed = true
+      cancelAnimationFrame(resizeFrame)
+      clearTimeout(resizeTimer)
+      clearTimeout(errorTimer)
       resizeObserver.disconnect()
-      markers.forEach(({ marker }) => marker.remove())
+      map.off('load', handleLoad)
+      map.off('error', handleError)
+      map.off('sourcedata', handleSourceData)
+      markers.forEach(({ marker, el, select }) => {
+        el.removeEventListener('click', select)
+        marker.remove()
+      })
       markers.clear()
       map.remove()
     },

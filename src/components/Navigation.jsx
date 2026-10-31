@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { motion, useMotionValueEvent, useScroll } from 'motion/react'
+import { motion, useMotionValueEvent, useReducedMotion, useScroll } from 'motion/react'
 import BrandLogo from './BrandLogo'
 import { EASE } from './Reveal'
 
@@ -11,6 +11,7 @@ const LINKS = [
 
 export default function Navigation() {
   const { scrollY } = useScroll()
+  const reduceMotion = useReducedMotion()
   const [scrolled, setScrolled] = useState(false)
   const [hidden, setHidden] = useState(false)
 
@@ -36,8 +37,17 @@ export default function Navigation() {
         aria-label="Główna nawigacja"
         className="container-site flex h-16 items-center justify-between md:h-20"
       >
-        <a href="#top" aria-label="Studio Figura — początek strony" className="py-2">
-          <BrandLogo className="text-[1.4rem] md:text-[1.7rem] xl:text-[1.9rem]" />
+        <a
+          href="#top"
+          onClick={(event) => {
+            event.preventDefault()
+            window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' })
+            history.replaceState(null, '', location.pathname + location.search)
+          }}
+          aria-label="Studio Figura — przejdź na początek strony"
+          className="-ml-1 flex items-center rounded-lg p-1"
+        >
+          <BrandLogo variant="mark" alt="" className="h-11 md:h-12 xl:h-[3.25rem]" />
         </a>
 
         <ul className="hidden items-center gap-10 md:flex xl:gap-12">

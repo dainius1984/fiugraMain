@@ -29,7 +29,12 @@ export default function MapPopup({ studio, number, onClose, reduceMotion, panelR
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12, scale: 0.98 }}
       transition={{ duration: 0.45, ease: EASE }}
-      onKeyDown={(e) => e.key === 'Escape' && onClose()}
+      onKeyDown={(event) => {
+        if (event.key === 'Escape') {
+          event.stopPropagation()
+          onClose(event)
+        }
+      }}
       className="relative z-20 mt-3 scroll-mb-4 rounded-2xl bg-ivory-50 p-5 shadow-[0_24px_60px_-32px_rgba(23,23,23,0.4)] ring-1 ring-brand-200 sm:p-6 lg:absolute lg:left-5 lg:top-5 lg:mt-0 lg:w-[23rem]"
     >
       <button

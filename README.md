@@ -97,11 +97,12 @@ cards present it as that studio. Photos fade in once loaded, inside a reserved 1
 Video never loads for visitors with *reduced motion* or *data saver* enabled.
 Use only footage and photos you have rights to.
 
-**Logo:** [src/components/BrandLogo.jsx](src/components/BrandLogo.jsx) is used in the navigation and footer.
-Add the official, authorised logo as `public/images/brand/studio-figura-logo.svg` (or `.webp` / `.png` with transparency).
-Add `studio-figura-logo-light.*` for the dark footer. Both are picked up automatically at build time and shown undistorted
-at the wordmark's height. Until then, the temporary typographic lockup in
-[src/components/Wordmark.jsx](src/components/Wordmark.jsx) is shown. It is not the official logo.
+**Logo:** the official SF logo is in `public/images/brand/`, generated from the source `public/images/Elegant SF Studio Figura Monogram.png` (kept unchanged). The files were trimmed, not redrawn or distorted:
+- `studio-figura-logo.{webp,png}` (880×550): full lockup for light backgrounds.
+- `studio-figura-logo-light.{webp,png}` (880×550): white lettering with the orange rule kept, used in the dark footer.
+- `studio-figura-mark.{webp,png}` (240×255): the SF monogram only, used in the navigation, where the full lockup's small "STUDIO FIGURA" line would be unreadably small.
+
+[src/components/BrandLogo.jsx](src/components/BrandLogo.jsx) picks them up at build time, with `variant="mark" | "full"` and `tone="light"`. It sets width and height so nothing shifts while loading, and falls back to the typographic [Wordmark.jsx](src/components/Wordmark.jsx) if the files are missing.
 
 ## Map
 

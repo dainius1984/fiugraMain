@@ -8,6 +8,7 @@ import { locationsPhrase, pad2 } from '../lib/studio-utils'
 
 const CONSENT_KEY = 'sf-map-consent'
 const DESKTOP = '(min-width: 1024px)'
+const LOAD_TIMEOUT_MS = 20000
 
 /**
  * The studio finder — the site's central feature.
@@ -25,14 +26,35 @@ export default function StudioMap({ studios }) {
   const mapEl = useRef(null)
   const panelRef = useRef(null)
   const controllerRef = useRef(null)
+  const openerRef = useRef(null)
 
   const [selectedId, setSelectedId] = useState(null)
   const [consent, setConsent] = useState(false)
   const [nearViewport, setNearViewport] = useState(false)
   const [status, setStatus] = useState('preview') // preview | loading | ready | unsupported | error
+  const [attempt, setAttempt] = useState(0)
 
   const selected = located.find((s) => s.id === selectedId) ?? null
   const selectedIndex = located.findIndex((s) => s.id === selectedId)
+
+  const selectStudio = useCallback((id, trigger) => {
+    openerRef.current = trigger
+    setSelectedId(id)
+  }, [])
+
+  const closeDetails = useCallback((event) => {
+    // Restore keyboard focus before the exiting panel's DOM is removed. Pointer
+    // dismissal does not move focus to a distant marker unexpectedly.
+    if (event?.type === 'keydown' || event?.detail === 0) {
+      const trigger = openerRef.current
+      const target = trigger?.isConnected && !trigger.closest('[inert]')
+        ? trigger
+        : [...(sectionRef.current?.querySelectorAll('[data-studio-selector]') ?? [])]
+          .find((button) => button.dataset.studioSelector === selectedId)
+      target?.focus({ preventScroll: true })
+    }
+    setSelectedId(null)
+  }, [selectedId])
 
   // Remembered consent → load automatically, but only once the section is close to view.
   useEffect(() => {
@@ -50,39 +72,58 @@ export default function StudioMap({ studios }) {
   useEffect(() => {
     if (!consent || !nearViewport || !mapEl.current) return
     let cancelled = false
+    let failed = false
+    let controller
+    const fail = () => {
+      if (cancelled || failed) return
+      failed = true
+      clearTimeout(timeout)
+      setStatus('error')
+      // An error can arrive while the controller is being constructed.
+      queueMicrotask(() => {
+        controller?.destroy()
+        if (controllerRef.current === controller) controllerRef.current = null
+      })
+    }
+    // Covers the lazy import, style and first visible tiles, including stalled requests.
+    const timeout = setTimeout(fail, LOAD_TIMEOUT_MS)
     setStatus('loading')
     import('./map/createStudioMap')
       .then(({ createStudioMap, webgl2Supported }) => {
-        if (cancelled) return
+        if (cancelled || failed) return
         if (!webgl2Supported()) {
+          clearTimeout(timeout)
           setStatus('unsupported')
           return
         }
         try {
-          controllerRef.current = createStudioMap(mapEl.current, {
+          controller = createStudioMap(mapEl.current, {
             studios: located,
             reduceMotion: Boolean(reduceMotion),
             isCompact: () => !window.matchMedia(DESKTOP).matches,
-            onSelect: (id) => setSelectedId(id),
-            onReady: () => !cancelled && setStatus('ready'),
+            onSelect: selectStudio,
+            onReady: () => {
+              if (cancelled || failed) return
+              clearTimeout(timeout)
+              setStatus('ready')
+            },
+            onError: fail,
           })
-        } catch (error) {
-          console.warn('Studio map unavailable:', error)
-          setStatus('unsupported')
+          controllerRef.current = controller
+        } catch {
+          fail()
         }
       })
-      .catch((error) => {
-        console.warn('Studio map failed to load:', error)
-        if (!cancelled) setStatus('error')
-      })
+      .catch(fail)
     return () => {
       cancelled = true
-      controllerRef.current?.destroy()
-      controllerRef.current = null
+      clearTimeout(timeout)
+      controller?.destroy()
+      if (controllerRef.current === controller) controllerRef.current = null
     }
     // The studio list is static data; reduced-motion is read once at creation.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [consent, nearViewport])
+  }, [consent, nearViewport, attempt, selectStudio])
 
   // Sync selection → markers + camera.
   useEffect(() => {
@@ -102,6 +143,7 @@ export default function StudioMap({ studios }) {
   }, [selectedId, reduceMotion])
 
   const activate = useCallback(() => {
+    setAttempt((value) => value + 1)
     setConsent(true)
     setNearViewport(true)
     try {
@@ -125,7 +167,7 @@ export default function StudioMap({ studios }) {
       id="mapa"
       aria-labelledby="mapa-heading"
       className="bg-ivory-100 pb-14 pt-8 md:pb-24 md:pt-20"
-      onKeyDown={(e) => e.key === 'Escape' && selectedId && setSelectedId(null)}
+      onKeyDown={(e) => e.key === 'Escape' && selectedId && closeDetails(e)}
     >
       <div className="container-site">
         <div className="mx-auto max-w-2xl text-center">
@@ -148,14 +190,14 @@ export default function StudioMap({ studios }) {
               <MapPreview
                 studios={located}
                 selectedId={selectedId}
-                onSelect={setSelectedId}
+                onSelect={selectStudio}
                 status={status}
                 onActivate={activate}
                 hidden={live}
                 reduceMotion={reduceMotion}
               />
               {/* React owns only this wrapper's classes; MapLibre owns the inner container's. */}
-              <div className={`absolute inset-0 transition-opacity duration-700 ease-luxe ${live ? 'opacity-100' : 'pointer-events-none opacity-0'}`}>
+              <div inert={!live} aria-hidden={!live} className={`absolute inset-0 transition-opacity duration-700 ease-luxe ${live ? 'opacity-100' : 'pointer-events-none opacity-0'}`}>
                 <div ref={mapEl} role="region" aria-label="Interaktywna mapa studiów Studio Figura" className="sf-map h-full w-full" />
               </div>
             </div>
@@ -166,7 +208,7 @@ export default function StudioMap({ studios }) {
                   key={selected.id}
                   studio={selected}
                   number={pad2(selectedIndex + 1)}
-                  onClose={() => setSelectedId(null)}
+                  onClose={closeDetails}
                   reduceMotion={reduceMotion}
                   panelRef={panelRef}
                 />
@@ -182,7 +224,7 @@ export default function StudioMap({ studios }) {
         <MapLocationSelector
           studios={located}
           selectedId={selectedId}
-          onSelect={setSelectedId}
+          onSelect={selectStudio}
           onShowAll={showAll}
           controlsId="map-studio-details"
         />
@@ -215,7 +257,7 @@ function MapPreview({ studios, selectedId, onSelect, status, onActivate, hidden,
   const failed = status === 'unsupported' || status === 'error'
 
   return (
-    <div aria-hidden={hidden} className={`absolute inset-0 transition-opacity duration-700 ease-luxe ${hidden ? 'pointer-events-none opacity-0' : 'opacity-100'}`}>
+    <div inert={hidden} aria-hidden={hidden} className={`absolute inset-0 transition-opacity duration-700 ease-luxe ${hidden ? 'pointer-events-none opacity-0' : 'opacity-100'}`}>
       {/* Quiet cartographic texture */}
       <div className="absolute inset-0 bg-[radial-gradient(90%_70%_at_70%_30%,var(--color-ivory-50)_0%,var(--color-ivory-100)_55%,var(--color-ivory-200)_100%)]" />
       <svg className="absolute inset-0 h-full w-full opacity-60" aria-hidden="true">
@@ -241,7 +283,7 @@ function MapPreview({ studios, selectedId, onSelect, status, onActivate, hidden,
                 type="button"
                 tabIndex={-1}
                 aria-hidden="true"
-                onClick={() => onSelect(p.id)}
+                onClick={(event) => onSelect(p.id, event.currentTarget)}
                 initial={reduceMotion ? false : { opacity: 0, scale: 0.6 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.6, ease: EASE, delay: 0.2 + i * 0.1 }}
@@ -250,7 +292,7 @@ function MapPreview({ studios, selectedId, onSelect, status, onActivate, hidden,
               >
                 <span
                   className={`grid size-8 place-items-center rounded-full border-[1.5px] border-brand-400 text-[0.7rem] font-semibold shadow-[0_8px_18px_-8px_rgba(23,23,23,0.6)] transition-[background-color,color,scale] duration-500 ease-luxe ${
-                    active ? 'scale-115 bg-brand-400 text-ivory-50' : 'bg-ink-900 text-brand-400'
+                    active ? 'scale-115 bg-brand-600 text-ivory-50' : 'bg-ink-900 text-brand-400'
                   }`}
                 >
                   {pad2(i + 1)}
@@ -270,12 +312,14 @@ function MapPreview({ studios, selectedId, onSelect, status, onActivate, hidden,
         <p className="font-serif text-[1.35rem] leading-tight text-ink-900 sm:mt-2 sm:text-[1.6rem] lg:text-[1.9rem]">
           {failed ? 'Mapa jest niedostępna' : 'Wszystkie studia na jednej mapie'}
         </p>
-        <p className="mt-1.5 text-[0.82rem] leading-snug text-ink-600 lg:mt-3 lg:text-[0.9rem]">
+        <p aria-live="polite" className="mt-1.5 text-[0.82rem] leading-snug text-ink-600 lg:mt-3 lg:text-[0.9rem]">
           {failed
-            ? 'Twoja przeglądarka nie obsługuje mapy interaktywnej. Wybierz studio z listy poniżej.'
+            ? status === 'unsupported'
+              ? 'Twoja przeglądarka nie obsługuje mapy interaktywnej. Wybierz studio z listy poniżej.'
+              : 'Nie udało się wczytać mapy. Spróbuj ponownie lub wybierz studio z listy poniżej.'
             : 'Mapa wczytuje kafelki z OpenFreeMap (dane © OpenStreetMap) — dopiero po kliknięciu.'}
         </p>
-        {!failed && (
+        {status !== 'unsupported' && (
           <button
             type="button"
             onClick={onActivate}
@@ -283,7 +327,7 @@ function MapPreview({ studios, selectedId, onSelect, status, onActivate, hidden,
             className="group relative isolate mt-3 inline-flex min-h-12 w-full items-center justify-center gap-2 overflow-hidden rounded-full bg-ink-900 px-5 text-[0.75rem] font-semibold uppercase tracking-[0.16em] text-ivory-50 transition-colors duration-500 ease-luxe disabled:cursor-wait sm:w-auto lg:mt-5 lg:min-h-13"
           >
             <span aria-hidden="true" className="absolute inset-0 -z-10 origin-left scale-x-0 bg-brand-600 transition-transform duration-500 ease-luxe group-hover:scale-x-100" />
-            {busy ? 'Wczytywanie mapy…' : 'Pokaż interaktywną mapę'}
+            {busy ? 'Wczytywanie mapy…' : failed ? 'SPRÓBUJ PONOWNIE' : 'Pokaż interaktywną mapę'}
           </button>
         )}
       </div>

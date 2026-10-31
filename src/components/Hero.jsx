@@ -75,9 +75,9 @@ export default function Hero({ studioCount, places = [] }) {
         {/* Copy */}
         <div className="lg:order-1">
           <motion.p
-            initial={{ opacity: 0, letterSpacing: '0.6em' }}
+            initial={reduceMotion ? false : { opacity: 0, letterSpacing: '0.6em' }}
             animate={{ opacity: 1, letterSpacing: '0.38em' }}
-            transition={{ duration: 1.6, ease: EASE, delay: 0.2 }}
+            transition={{ duration: reduceMotion ? 0 : 1.6, ease: EASE, delay: reduceMotion ? 0 : 0.2 }}
             className="eyebrow mb-4 flex items-center gap-4 text-brand-600 md:mb-6"
           >
             <span aria-hidden="true" className="h-px w-10 bg-brand-400" />
@@ -96,9 +96,9 @@ export default function Hero({ studioCount, places = [] }) {
                     <span key={word + i} className="inline-block overflow-hidden pb-[0.08em] align-bottom">
                       <motion.span
                         className="inline-block"
-                        initial={{ y: '105%', opacity: 0, filter: 'blur(8px)' }}
+                        initial={reduceMotion ? false : { y: '105%', opacity: 0, filter: 'blur(8px)' }}
                         animate={{ y: '0%', opacity: 1, filter: 'blur(0px)' }}
-                        transition={{ duration: 1.2, ease: EASE, delay: 0.4 + i * 0.12 }}
+                        transition={{ duration: reduceMotion ? 0 : 1.2, ease: EASE, delay: reduceMotion ? 0 : 0.4 + i * 0.12 }}
                       >
                         {word}
                       </motion.span>
@@ -111,23 +111,23 @@ export default function Hero({ studioCount, places = [] }) {
           </h1>
 
           <motion.p
-            initial={{ opacity: 0, y: 16 }}
+            initial={reduceMotion ? false : { opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.1, ease: EASE, delay: 1 }}
+            transition={{ duration: reduceMotion ? 0 : 1.1, ease: EASE, delay: reduceMotion ? 0 : 1 }}
             className="mt-3 max-w-md text-[1.05rem] leading-relaxed text-ink-600 md:mt-6 md:text-lg lg:mt-8"
           >
             Znajdź swoje Studio Figura i odkryj przestrzeń stworzoną z myślą o Tobie.
           </motion.p>
 
           <motion.div
-            initial={{ opacity: 0, y: 16 }}
+            initial={reduceMotion ? false : { opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.1, ease: EASE, delay: 1.15 }}
+            transition={{ duration: reduceMotion ? 0 : 1.1, ease: EASE, delay: reduceMotion ? 0 : 1.15 }}
             className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6 lg:mt-10"
           >
             <motion.a
               href="#mapa"
-              whileTap={{ scale: 0.97 }}
+              whileTap={reduceMotion ? undefined : { scale: 0.97 }}
               className="group relative isolate inline-flex min-h-14 items-center justify-between gap-6 overflow-hidden rounded-full bg-ink-900 py-2 pl-7 pr-2 text-[0.8rem] font-semibold uppercase tracking-[0.18em] text-ivory-50 transition-colors duration-500 ease-luxe sm:justify-start"
             >
               <span

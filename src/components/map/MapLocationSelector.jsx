@@ -12,7 +12,8 @@ export default function MapLocationSelector({ studios, selectedId, onSelect, onS
             <li key={studio.id}>
               <button
                 type="button"
-                onClick={() => onSelect(studio.id)}
+                onClick={(event) => onSelect(studio.id, event.currentTarget)}
+                data-studio-selector={studio.id}
                 aria-pressed={active}
                 aria-controls={controlsId}
                 className={`group flex min-h-14 w-full items-center gap-3 rounded-2xl border px-4 py-3 text-left transition-[background-color,border-color,box-shadow] duration-500 ease-luxe ${
@@ -24,7 +25,7 @@ export default function MapLocationSelector({ studios, selectedId, onSelect, onS
                 <span
                   aria-hidden="true"
                   className={`grid size-9 shrink-0 place-items-center rounded-full border text-[0.72rem] font-semibold transition-colors duration-500 ease-luxe ${
-                    active ? 'border-brand-400 bg-brand-400 text-ivory-50' : 'border-brand-400 bg-ink-900 text-brand-400'
+                    active ? 'border-brand-600 bg-brand-600 text-ivory-50' : 'border-brand-400 bg-ink-900 text-brand-400'
                   }`}
                 >
                   {pad2(i + 1)}

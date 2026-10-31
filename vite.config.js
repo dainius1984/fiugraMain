@@ -61,12 +61,30 @@ function detectHeroMedia() {
 
 const LOGO_EXT = ['.svg', '.webp', '.png']
 
-/** Official logo files (only add authorised assets). The light variant is used on the dark footer. */
+/** Intrinsic size of a PNG (read from its IHDR header) — used for width/height attributes (no layout shift). */
+function pngSize(rel) {
+  const file = path.join(publicDir, rel)
+  if (!fs.existsSync(file)) return null
+  const head = Buffer.alloc(24)
+  const fd = fs.openSync(file, 'r')
+  fs.readSync(fd, head, 0, 24, 0)
+  fs.closeSync(fd)
+  return { width: head.readUInt32BE(16), height: head.readUInt32BE(20) }
+}
+
+/**
+ * Official logo files in public/images/brand/ (only authorised assets):
+ *  - studio-figura-logo.*        full lockup (SF monogram, STUDIO FIGURA, orange rule) — light backgrounds
+ *  - studio-figura-logo-light.*  same lockup with white lettering — dark backgrounds (footer)
+ *  - studio-figura-mark.*        SF monogram only — compact navigation
+ * WebP is preferred; a PNG of the same name supplies the intrinsic size.
+ */
 function detectBrandLogo() {
-  const find = (name) => firstExisting(LOGO_EXT.map((ext) => `images/brand/${name}${ext}`))
-  const dark = find('studio-figura-logo')
-  const light = find('studio-figura-logo-light')
-  return { dark: dark && `/${dark}`, light: light && `/${light}` }
+  const asset = (name) => {
+    const file = firstExisting(LOGO_EXT.map((ext) => `images/brand/${name}${ext}`))
+    return file ? { src: `/${file}`, ...pngSize(`images/brand/${name}.png`) } : null
+  }
+  return { dark: asset('studio-figura-logo'), light: asset('studio-figura-logo-light'), mark: asset('studio-figura-mark') }
 }
 
 function detectStudioImages() {

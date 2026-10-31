@@ -10,7 +10,7 @@ export default function Footer({ studios }) {
       <div className="container-site pb-10 pt-16 md:pt-24">
         <div className="grid gap-12 md:grid-cols-[1.2fr_2fr]">
           <div>
-            <BrandLogo tone="light" className="text-[1.9rem] md:text-[2.2rem]" />
+            <BrandLogo tone="light" alt="Studio Figura — logo" className="h-28 md:h-32" />
             <p className="mt-5 font-serif text-2xl italic text-brand-400">Twoje piękno. Twoje miejsce.</p>
           </div>
 

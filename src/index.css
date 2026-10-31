@@ -204,7 +204,8 @@
 
 .sf-mk.is-active .sf-mk__dot {
   scale: 1.18;
-  background: var(--color-brand-400);
+  /* White 12px numbers on dark orange: 5.55:1 (WCAG AA). */
+  background: var(--color-brand-600);
   border-color: var(--color-ivory-50);
   color: var(--color-ivory-50);
 }
