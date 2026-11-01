@@ -1,6 +1,6 @@
 import { useRef } from 'react'
 import { motion, useReducedMotion, useScroll, useTransform } from 'motion/react'
-import { ArrowDown } from 'lucide-react'
+import { ArrowDown, ArrowRight } from 'lucide-react'
 import HeroMedia from './HeroMedia'
 import { EASE } from './Reveal'
 import { plural } from '../lib/studio-utils'
@@ -11,7 +11,7 @@ const LINES = [
   { words: ['—\u00A0nasza', 'specjalność.'], className: 'italic text-brand-400' },
 ]
 
-export default function Hero({ studioCount, places = [] }) {
+export default function Hero({ studioCount }) {
   const ref = useRef(null)
   const reduceMotion = useReducedMotion()
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] })
@@ -58,19 +58,24 @@ export default function Hero({ studioCount, places = [] }) {
             className="pointer-events-none absolute inset-0 -z-10 hidden translate-x-5 translate-y-5 rounded-[2rem] rounded-tl-[9rem] border border-brand-300 lg:block"
           />
 
-          {/* Floating caption: the factual "where" of the brand (desktop) */}
-          <motion.div
-            initial={reduceMotion ? false : { opacity: 0, y: 24 }}
+          {/* Editorial caption (desktop only): sits on the lower-left edge, clear of both faces */}
+          <motion.a
+            href="#mapa"
+            initial={reduceMotion ? false : { opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.2, ease: EASE, delay: 1.2 }}
-            className="absolute -left-10 bottom-12 hidden max-w-[17rem] rounded-2xl bg-ivory-50/95 px-6 py-5 shadow-[0_24px_50px_-30px_rgba(23,23,23,0.35)] ring-1 ring-brand-200 backdrop-blur lg:block"
+            transition={{ duration: reduceMotion ? 0 : 1.1, ease: EASE, delay: reduceMotion ? 0 : 1.3 }}
+            className="group absolute -left-6 bottom-10 hidden rounded-xl bg-ivory-50/92 px-4 py-3 ring-1 ring-brand-200/80 backdrop-blur-sm lg:block"
           >
-            <p className="flex items-baseline gap-3">
-              <span className="font-serif text-5xl leading-none text-brand-400">{studioCount}</span>
-              <span className="eyebrow text-ink-900">{studiosLabel}</span>
-            </p>
-            <p className="mt-2 text-sm leading-snug text-ink-600">{places.join(' · ')}</p>
-          </motion.div>
+            <span className="flex items-center gap-2 text-[0.6rem] font-semibold uppercase tracking-[0.3em] text-brand-600">
+              <span aria-hidden="true" className="h-px w-4 bg-brand-400" />
+              Studio Figura
+            </span>
+            <span className="mt-1 block font-serif text-[1.15rem] italic leading-tight text-ink-900">Wrocław i okolice</span>
+            <span className="mt-1.5 flex items-center gap-1.5 text-[0.7rem] tracking-[0.04em] text-ink-600 transition-colors duration-500 group-hover:text-brand-600">
+              Odkryj nasze lokalizacje
+              <ArrowRight className="size-3 transition-transform duration-500 ease-luxe group-hover:translate-x-0.5" strokeWidth={1.75} aria-hidden="true" />
+            </span>
+          </motion.a>
         </div>
 
         {/* Copy */}

@@ -1,4 +1,3 @@
-import { useMemo } from 'react'
 import { MotionConfig } from 'motion/react'
 import Navigation from './components/Navigation'
 import Hero from './components/Hero'
@@ -8,8 +7,6 @@ import Footer from './components/Footer'
 import { publishedStudios as studios } from './data/studios'
 
 export default function ExistingSite() {
-  const places = useMemo(() => [...new Set(studios.map((s) => s.city))], [])
-
   return (
     <MotionConfig reducedMotion="user">
       <a
@@ -20,7 +17,7 @@ export default function ExistingSite() {
       </a>
       <Navigation />
       <main id="top">
-        <Hero studioCount={studios.length} places={places} />
+        <Hero studioCount={studios.length} />
         <StudioMap studios={studios} />
         <StudioDirectory studios={studios} />
       </main>
