@@ -126,7 +126,8 @@ and a details panel for the chosen studio.
 - **Selecting** a marker or a selector item flies the camera to the studio (500–900 ms depending on distance) and opens the
   details panel: name, address, **Odwiedź stronę** / **Odwiedź Facebook**, **Wyznacz trasę**. Nothing redirects
   automatically. Escape or × closes the panel. On phones the panel sits below the map; on desktop it floats at the top-left.
-- **Pokaż wszystkie lokalizacje** clears the selection and fits all studios again.
+- **Resetuj widok:** a small control in the map's top-right corner, shown only while the camera is on a single studio.
+  It clears the selection and fits all studios again.
 - **Gestures:** cooperative gestures, so the page always scrolls normally (Ctrl/⌘ + scroll to zoom; two fingers to pan on phones).
   No rotation or tilt. Reduced motion turns off the marker stagger, camera flights and intro zoom.
 - **Coordinates:** `coordinates` in studios.js (stored as `{ lat, lng }`, converted to MapLibre's `[lng, lat]` in one place).

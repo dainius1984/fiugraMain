@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
-import { MapPinned, MousePointerClick } from 'lucide-react'
+import { MapPinned, MousePointerClick, RotateCcw } from 'lucide-react'
 import Reveal, { EASE } from './Reveal'
 import MapPopup from './map/MapPopup'
 import MapLocationSelector from './map/MapLocationSelector'
@@ -33,6 +33,8 @@ export default function StudioMap({ studios }) {
   const [nearViewport, setNearViewport] = useState(false)
   const [status, setStatus] = useState('preview') // preview | loading | ready | unsupported | error
   const [attempt, setAttempt] = useState(0)
+  // The camera stays on a studio after its details close, until the overview is restored.
+  const [zoomedIn, setZoomedIn] = useState(false)
 
   const selected = located.find((s) => s.id === selectedId) ?? null
   const selectedIndex = located.findIndex((s) => s.id === selectedId)
@@ -40,6 +42,7 @@ export default function StudioMap({ studios }) {
   const selectStudio = useCallback((id, trigger) => {
     openerRef.current = trigger
     setSelectedId(id)
+    setZoomedIn(true)
   }, [])
 
   const closeDetails = useCallback((event) => {
@@ -153,8 +156,11 @@ export default function StudioMap({ studios }) {
     }
   }, [])
 
-  const showAll = useCallback(() => {
+  const showAll = useCallback((event) => {
+    // The control disappears once used: keep keyboard focus on the map.
+    if (event?.detail === 0) mapEl.current?.querySelector('canvas')?.focus({ preventScroll: true })
     setSelectedId(null)
+    setZoomedIn(false)
     controllerRef.current?.setActive(null)
     controllerRef.current?.showAll()
   }, [])
@@ -206,6 +212,24 @@ export default function StudioMap({ studios }) {
               <div inert={!live} aria-hidden={!live} className={`absolute inset-0 transition-opacity duration-700 ease-luxe ${live ? 'opacity-100' : 'pointer-events-none opacity-0'}`}>
                 <div ref={mapEl} role="region" aria-label="Interaktywna mapa studiów Studio Figura" aria-describedby="mapa-hint" className="sf-map h-full w-full" />
               </div>
+
+              <AnimatePresence>
+                {live && zoomedIn && (
+                  <motion.button
+                    type="button"
+                    onClick={showAll}
+                    initial={reduceMotion ? false : { opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={reduceMotion ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, y: -4 }}
+                    transition={{ duration: 0.35, ease: EASE }}
+                    aria-label="Resetuj widok — pokaż wszystkie studia"
+                    className="absolute right-3 top-3 z-10 inline-flex min-h-10 items-center gap-1.5 rounded-full border border-brand-200 bg-ivory-50/95 px-3.5 text-[0.78rem] font-medium text-ink-900 shadow-[0_12px_30px_-18px_rgba(23,23,23,0.5)] backdrop-blur transition-colors duration-300 hover:bg-ivory-50 hover:text-brand-600 md:right-4 md:top-4"
+                  >
+                    <RotateCcw className="size-3.5 text-brand-400" strokeWidth={1.75} aria-hidden="true" />
+                    Resetuj widok
+                  </motion.button>
+                )}
+              </AnimatePresence>
             </div>
 
             <AnimatePresence mode="wait">
@@ -231,7 +255,6 @@ export default function StudioMap({ studios }) {
           studios={located}
           selectedId={selectedId}
           onSelect={selectStudio}
-          onShowAll={showAll}
           controlsId="map-studio-details"
         />
       </div>

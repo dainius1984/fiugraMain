@@ -1,8 +1,7 @@
-import { Maximize2 } from 'lucide-react'
 import { pad2, shortStudioName } from '../../lib/studio-utils'
 
 /** Compact, keyboard-friendly studio picker under the map (synchronised with the markers). */
-export default function MapLocationSelector({ studios, selectedId, onSelect, onShowAll, controlsId }) {
+export default function MapLocationSelector({ studios, selectedId, onSelect, controlsId }) {
   return (
     <div className="mt-4 md:mt-5">
       <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5 lg:gap-3" aria-label="Wybierz studio na mapie">
@@ -53,19 +52,6 @@ export default function MapLocationSelector({ studios, selectedId, onSelect, onS
           )
         })}
       </ul>
-
-      <div className="mt-4 flex justify-center">
-        <button
-          type="button"
-          onClick={onShowAll}
-          className="group inline-flex min-h-12 items-center gap-2.5 rounded-full px-4 text-[0.75rem] font-semibold uppercase tracking-[0.18em] text-ink-900"
-        >
-          <Maximize2 className="size-4 text-brand-400 transition-transform duration-500 ease-luxe group-hover:scale-110" strokeWidth={1.75} aria-hidden="true" />
-          <span className="border-b border-brand-300 pb-0.5 transition-colors duration-500 group-hover:border-ink-900">
-            Pokaż wszystkie lokalizacje
-          </span>
-        </button>
-      </div>
     </div>
   )
 }
