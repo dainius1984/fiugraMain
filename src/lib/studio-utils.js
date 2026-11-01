@@ -46,3 +46,6 @@ export const pad2 = (n) => String(n).padStart(2, '0')
 
 /** "Studio Figura Wrocław Szczepin" → "Wrocław Szczepin". */
 export const shortStudioName = (name) => name.replace(/^Studio Figura\s*/, '')
+
+/** tel: URI from the stored E.164 number, e.g. "tel:+48500753477". */
+export const telHref = (studio) => (studio.phone?.e164 ? `tel:${studio.phone.e164}` : null)

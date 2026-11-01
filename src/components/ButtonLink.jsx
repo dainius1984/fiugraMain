@@ -1,13 +1,18 @@
 import { motion } from 'motion/react'
 
 const base =
-  'group/btn relative isolate inline-flex min-h-14 items-center justify-center gap-2.5 overflow-hidden rounded-full px-6 text-[0.8rem] font-semibold lg:text-[0.84rem] uppercase tracking-[0.16em] transition-colors duration-500 ease-luxe'
+  'group/btn relative isolate inline-flex items-center justify-center gap-2.5 overflow-hidden rounded-full px-6 text-[0.8rem] font-semibold lg:text-[0.84rem] uppercase tracking-[0.16em] transition-colors duration-500 ease-luxe'
 
 const variants = {
   brand: 'bg-brand-600 text-ivory-50 hover:text-ivory-50',
   ink: 'bg-ink-900 text-ivory-50 hover:text-ivory-50',
   outline: 'border border-brand-300 text-ink-900 hover:border-ink-900 hover:text-ivory-50',
   'outline-light': 'border border-ivory-100/30 text-ivory-100 hover:border-ivory-100 hover:text-ink-900',
+}
+
+const sizes = {
+  lg: 'min-h-14', // primary actions (56px)
+  md: 'min-h-12', // secondary actions (48px) — still a comfortable touch target
 }
 
 const sweep = {
@@ -25,10 +30,12 @@ export default function ButtonLink({
   href,
   children,
   variant = 'ink',
+  size = 'lg',
   external = false,
   className = '',
   icon: Icon,
   iconOnly = false,
+  iconClassName = '',
   label,
   ...rest
 }) {
@@ -37,7 +44,7 @@ export default function ButtonLink({
     <motion.a
       href={href}
       whileTap={{ scale: 0.97 }}
-      className={`${base} ${variants[variant]} ${iconOnly ? 'aspect-square shrink-0 px-0 w-14' : ''} ${className}`}
+      className={`${base} ${sizes[size]} ${variants[variant]} ${iconOnly ? 'aspect-square shrink-0 px-0 w-14' : ''} ${className}`}
       aria-label={label}
       {...externalProps}
       {...rest}
@@ -51,7 +58,7 @@ export default function ButtonLink({
         <Icon
           className={`size-4 shrink-0 transition-transform duration-500 ease-luxe ${
             iconOnly ? 'size-5' : 'group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5'
-          }`}
+          } ${iconClassName}`}
           strokeWidth={1.75}
         />
       )}

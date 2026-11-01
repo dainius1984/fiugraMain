@@ -61,9 +61,12 @@ immediately (no search or filters), and the cards, counts, map and footer update
 - Five locations: Wrocław Szczepin, Wrocław Swojczyce (website ends in **.com**; Szczepin's ends in **.pl**),
   Wrocław Zwycięska, Bielany Wrocławskie (Facebook only) and Strzelin. The client confirmed these five, including Strzelin.
 - `published: false` hides an entry completely; incomplete entries stay hidden even when published.
+- **Phones** (`phone: { e164, display }`): every card and the map details panel show **Zadzwoń do nas**
+  ([src/components/StudioPhoneAction.jsx](src/components/StudioPhoneAction.jsx)). It is a plain `tel:` link, so phones open the dialer and nothing dials automatically.
+  With a mouse (`(hover: hover) and (pointer: fine)`), it opens a small dialog with the number, **Kopiuj numer** (Clipboard API, falling back to selecting the number) and **Otwórz aplikację do połączeń**.
 - Primary button: **Odwiedź stronę** when `website` is set, otherwise **Odwiedź Facebook**.
   Secondary button: **Wyznacz trasę** (Google Maps directions built from the street address).
-- Page order: hero → **map (main feature)** → studio cards → brand statement → footer. "Znajdź studio" links to `#mapa`.
+- Page order: hero → **map (main feature)** → studio cards → footer. The brand statement section was removed at the client's request (2026-11-01). "Znajdź studio" links to `#mapa`.
 - Card layout: one column on mobile, two on tablet and laptops, 3 + 2 centred from 1280px.
 - Optional fields (`district`, `facebook`, `instagram`) can stay `null`; the UI hides what is missing.
 

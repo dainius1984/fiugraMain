@@ -3,7 +3,6 @@ import { MotionConfig } from 'motion/react'
 import Navigation from './components/Navigation'
 import Hero from './components/Hero'
 import StudioDirectory from './components/StudioDirectory'
-import BrandStatement from './components/BrandStatement'
 import StudioMap from './components/StudioMap'
 import Footer from './components/Footer'
 import { publishedStudios as studios } from './data/studios'
@@ -24,7 +23,6 @@ export default function ExistingSite() {
         <Hero studioCount={studios.length} places={places} />
         <StudioMap studios={studios} />
         <StudioDirectory studios={studios} />
-        <BrandStatement studioCount={studios.length} places={places} />
       </main>
       <Footer studios={studios} />
     </MotionConfig>

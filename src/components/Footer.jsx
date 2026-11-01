@@ -11,7 +11,7 @@ export default function Footer({ studios }) {
         <div className="grid gap-12 md:grid-cols-[1.2fr_2fr]">
           <div>
             <BrandLogo tone="light" alt="Studio Figura — logo" className="h-28 md:h-32" />
-            <p className="mt-5 font-serif text-2xl italic text-brand-400">Twoje piękno. Twoje miejsce.</p>
+            <p className="mt-5 font-serif text-2xl italic text-brand-400">Twoje piękno — nasza specjalność.</p>
           </div>
 
           <nav aria-label="Studia Studio Figura">

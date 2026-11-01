@@ -4,9 +4,8 @@ import BrandLogo from './BrandLogo'
 import { EASE } from './Reveal'
 
 const LINKS = [
-  { href: '#studia', label: 'Studia' },
   { href: '#mapa', label: 'Mapa' },
-  { href: '#o-nas', label: 'Filozofia' },
+  { href: '#studia', label: 'Studia' },
 ]
 
 export default function Navigation() {

@@ -3,6 +3,7 @@ import { motion } from 'motion/react'
 import { ArrowUpRight, MapPin, Navigation } from 'lucide-react'
 import StudioArt from './StudioArt'
 import ButtonLink from './ButtonLink'
+import StudioPhoneAction from './StudioPhoneAction'
 import { FacebookIcon, InstagramIcon } from './icons'
 import { EASE } from './Reveal'
 import { directionsUrl, primaryLink, shortLabel, studioImage } from '../lib/studio-utils'
@@ -62,7 +63,7 @@ export default function StudioCard({ studio, index, className = '' }) {
           aria-hidden="true"
           className="mb-4 block h-px w-10 bg-brand-400 transition-[width] duration-700 ease-luxe group-hover/card:w-20"
         />
-        <h3 id={headingId} className="font-serif text-[1.75rem] font-medium leading-[1.08] text-ink-900 sm:text-[1.9rem] xl:text-[2.25rem]">
+        <h3 id={headingId} className="min-h-[2.16em] font-serif text-[1.75rem] font-medium leading-[1.08] text-ink-900 sm:text-[1.9rem] xl:text-[2.25rem]">
           {studio.name}
         </h3>
 
@@ -78,7 +79,7 @@ export default function StudioCard({ studio, index, className = '' }) {
           </span>
         </address>
 
-        <div className="mt-auto flex flex-col gap-3 pt-7 lg:pt-8">
+        <div className="mt-auto flex flex-col gap-2.5 pt-7 lg:pt-8">
           <ButtonLink
             href={primary.href}
             external
@@ -94,6 +95,7 @@ export default function StudioCard({ studio, index, className = '' }) {
               href={directionsUrl(studio)}
               external
               variant="outline"
+              size="md"
               icon={Navigation}
               className="flex-1"
               aria-label={`Wyznacz trasę do: ${studio.name}, ${studio.street}, ${studio.city} — Mapy Google${NEW_TAB}`}
@@ -121,6 +123,7 @@ export default function StudioCard({ studio, index, className = '' }) {
               />
             )}
           </div>
+          <StudioPhoneAction studio={studio} className="w-full" />
         </div>
       </div>
     </motion.article>

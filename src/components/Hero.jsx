@@ -6,8 +6,9 @@ import { EASE } from './Reveal'
 import { plural } from '../lib/studio-utils'
 
 const LINES = [
-  { words: ['Twoje', 'piękno.'], className: 'text-ink-900' },
-  { words: ['Twoje', 'miejsce.'], className: 'italic text-brand-400' },
+  { words: ['Twoje', 'piękno'], className: 'text-ink-900' },
+  // The dash is glued to "nasza" (no-break space) so it can never end up alone on a line.
+  { words: ['—\u00A0nasza', 'specjalność.'], className: 'italic text-brand-400' },
 ]
 
 export default function Hero({ studioCount, places = [] }) {
@@ -86,7 +87,9 @@ export default function Hero({ studioCount, places = [] }) {
 
           <h1
             id="hero-heading"
-            className="font-serif text-[3rem] font-normal leading-[0.98] tracking-[-0.01em] sm:text-7xl lg:text-[4.4rem] xl:text-[5.8rem]"
+            // Sized so the longer line ("— nasza specjalność.", ≈7.3em wide) always fits its column;
+            // on phones it scales with the viewport (column = 100vw − 2.5rem).
+            className="font-serif text-[min(2.75rem,calc((100vw-2.5rem)/7.6))] font-normal leading-[1.02] tracking-[-0.01em] sm:text-7xl lg:text-[3.6rem] xl:text-[4.3rem]"
           >
             {LINES.map((line, li) => (
               <span key={li} className={`block whitespace-nowrap ${line.className}`}>
@@ -116,7 +119,7 @@ export default function Hero({ studioCount, places = [] }) {
             transition={{ duration: reduceMotion ? 0 : 1.1, ease: EASE, delay: reduceMotion ? 0 : 1 }}
             className="mt-3 max-w-md text-[1.05rem] leading-relaxed text-ink-600 md:mt-6 md:text-lg lg:mt-8"
           >
-            Znajdź swoje Studio Figura i odkryj przestrzeń stworzoną z myślą o Tobie.
+            Nowoczesne technologie, modelowanie sylwetki, kosmetologia estetyczna, pielęgnacja twarzy.
           </motion.p>
 
           <motion.div

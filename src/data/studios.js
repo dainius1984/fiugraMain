@@ -15,6 +15,8 @@
  *  - facebook    official Facebook page URL, or null
  *                (cards link to the website when present, otherwise to Facebook)
  *  - instagram   official Instagram profile URL, or null
+ *  - phone       { e164, display }: the studio's own number (client-supplied 2026-11-01).
+ *                e164 feeds tel: links; display is what visitors read. null hides call actions.
  *  - coordinates { lat, lng } of the building, used for the overview map.
  *                Source: OpenStreetMap / Nominatim, house-level match for each street address
  *                (checked 2026-10-31). "Wyznacz trasę" always navigates by street address.
@@ -30,6 +32,7 @@ export const studios = [
     website: 'https://studiofigurawroclaw.pl/',
     facebook: null,
     instagram: null,
+    phone: { e164: '+48500753477', display: '+48 500 753 477' },
     coordinates: { lat: 51.119799, lng: 17.0173832 },
   },
   {
@@ -42,6 +45,7 @@ export const studios = [
     website: 'https://studiofigurawroclaw.com/',
     facebook: null,
     instagram: null,
+    phone: { e164: '+48728809122', display: '+48 728 809 122' },
     coordinates: { lat: 51.1106034, lng: 17.1268951 },
   },
   {
@@ -54,6 +58,7 @@ export const studios = [
     website: 'https://sfwroclawzwycieska.pl/',
     facebook: null,
     instagram: null,
+    phone: { e164: '+48537863083', display: '+48 537 863 083' },
     coordinates: { lat: 51.0592934, lng: 17.0126415 },
   },
   {
@@ -66,6 +71,7 @@ export const studios = [
     website: null,
     facebook: 'https://www.facebook.com/share/1EzaXjEp3B/?mibextid=wwXIfr',
     instagram: null,
+    phone: { e164: '+48532255745', display: '+48 532 255 745' },
     coordinates: { lat: 51.034787, lng: 16.9626561 },
   },
   {
@@ -78,6 +84,7 @@ export const studios = [
     website: 'https://studiofigurastrzelin.pl/',
     facebook: null,
     instagram: null,
+    phone: { e164: '+48881281092', display: '+48 881 281 092' },
     coordinates: { lat: 50.77828, lng: 17.06487 },
   },
 ]

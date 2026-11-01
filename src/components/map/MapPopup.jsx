@@ -1,6 +1,7 @@
 import { motion } from 'motion/react'
 import { ArrowUpRight, MapPin, Navigation, X } from 'lucide-react'
 import ButtonLink from '../ButtonLink'
+import StudioPhoneAction from '../StudioPhoneAction'
 import { FacebookIcon } from '../icons'
 import { EASE } from '../Reveal'
 import { directionsUrl, primaryLink } from '../../lib/studio-utils'
@@ -68,7 +69,7 @@ export default function MapPopup({ studio, number, onClose, reduceMotion, panelR
           external
           variant="ink"
           icon={primary.kind === 'facebook' ? FacebookIcon : ArrowUpRight}
-          className="w-full"
+          className="w-full sm:col-span-2 lg:col-span-1"
           aria-label={`${primary.label}: ${studio.name}${NEW_TAB}`}
         >
           {primary.label}
@@ -77,12 +78,14 @@ export default function MapPopup({ studio, number, onClose, reduceMotion, panelR
           href={directionsUrl(studio)}
           external
           variant="outline"
+          size="md"
           icon={Navigation}
           className="w-full"
           aria-label={`Wyznacz trasę do: ${studio.name}, ${studio.street}, ${studio.city} — Mapy Google${NEW_TAB}`}
         >
           Wyznacz trasę
         </ButtonLink>
+        <StudioPhoneAction studio={studio} className="w-full" />
       </div>
     </motion.div>
   )
