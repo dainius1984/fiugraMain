@@ -12,7 +12,7 @@ const DESKTOP_POINTER = '(hover: hover) and (pointer: fine)'
  * - The trigger is a real `tel:` link, so it works without JavaScript and on every phone:
  *   tapping it opens the dialer (the visitor still confirms the call there).
  * - With a mouse (no assumption that the computer can place calls) the click opens a small
- *   native <dialog> instead: the number, "Kopiuj numer" and "Otwórz aplikację do połączeń".
+ *   native <dialog> instead: the number, "Kopiuj numer" and "Zadzwoń".
  *   Escape / × / backdrop close it, and focus returns to the trigger.
  */
 export default function StudioPhoneAction({ studio, className = '', size = 'md' }) {
@@ -141,9 +141,16 @@ function PhoneDialog({ studio, href, onClose }) {
         </p>
         <p
           ref={numberRef}
-          className="mt-3 select-all font-serif text-[2.1rem] leading-none tracking-[0.02em] text-ink-900 tabular-nums"
+          // Clean sans-serif digits for fast reading (the studio name above stays serif).
+          // Each group is unbreakable; ordinary spaces between groups keep manual copies clean.
+          className="sf-phone-number mt-3 select-all font-sans text-[clamp(1.5rem,8.2vw,2.125rem)] font-semibold leading-tight tracking-[-0.01em] text-ink-900"
         >
-          {studio.phone.display}
+          {studio.phone.display.split(' ').map((group, i) => (
+            <span key={i}>
+              {i > 0 && ' '}
+              <span className="inline-block whitespace-nowrap">{group}</span>
+            </span>
+          ))}
         </p>
 
         <div className="mt-6 grid gap-2.5">
@@ -161,7 +168,7 @@ function PhoneDialog({ studio, href, onClose }) {
             {copy === 'copied' ? 'Skopiowano' : 'Kopiuj numer'}
           </button>
           <ButtonLink href={href} variant="ink" icon={Phone} className="w-full px-4 text-[0.74rem]">
-            Otwórz aplikację do połączeń
+            Zadzwoń
           </ButtonLink>
         </div>
 

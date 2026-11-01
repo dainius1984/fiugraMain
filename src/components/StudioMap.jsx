@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
-import { MapPinned } from 'lucide-react'
+import { MapPinned, MousePointerClick } from 'lucide-react'
 import Reveal, { EASE } from './Reveal'
 import MapPopup from './map/MapPopup'
 import MapLocationSelector from './map/MapLocationSelector'
@@ -183,7 +183,13 @@ export default function StudioMap({ studios }) {
           </Reveal>
         </div>
 
-        <Reveal delay={0.12} y={20} className="mt-7 md:mt-10">
+        <Reveal delay={0.12} y={20} className="mt-6 md:mt-9">
+          {/* Interaction hint: sits above the frame, so it never covers a marker. */}
+          <p id="mapa-hint" className="mb-3 flex items-center justify-center gap-2 text-[0.82rem] leading-snug text-ink-700 md:mb-4 md:text-[0.88rem]">
+            <MousePointerClick className="size-4 shrink-0 text-brand-400" strokeWidth={1.75} aria-hidden="true" />
+            <span className="sm:hidden">Dotknij pinezki, aby zobaczyć szczegóły</span>
+            <span className="hidden sm:inline">Kliknij pinezkę, aby zobaczyć szczegóły gabinetu</span>
+          </p>
           <div className="relative">
             {/* Map frame — fixed height (no layout shift); preview underneath, live map fades in on top */}
             <div className="relative isolate h-[clamp(360px,56svh,440px)] overflow-hidden rounded-[1.25rem] bg-ivory-200 shadow-[0_30px_70px_-45px_rgba(23,23,23,0.45)] ring-1 ring-brand-200 md:h-[500px] md:rounded-[1.5rem] lg:h-[600px] xl:h-[640px]">
@@ -198,7 +204,7 @@ export default function StudioMap({ studios }) {
               />
               {/* React owns only this wrapper's classes; MapLibre owns the inner container's. */}
               <div inert={!live} aria-hidden={!live} className={`absolute inset-0 transition-opacity duration-700 ease-luxe ${live ? 'opacity-100' : 'pointer-events-none opacity-0'}`}>
-                <div ref={mapEl} role="region" aria-label="Interaktywna mapa studiów Studio Figura" className="sf-map h-full w-full" />
+                <div ref={mapEl} role="region" aria-label="Interaktywna mapa studiów Studio Figura" aria-describedby="mapa-hint" className="sf-map h-full w-full" />
               </div>
             </div>
 
@@ -287,12 +293,12 @@ function MapPreview({ studios, selectedId, onSelect, status, onActivate, hidden,
                 initial={reduceMotion ? false : { opacity: 0, scale: 0.6 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.6, ease: EASE, delay: 0.2 + i * 0.1 }}
-                className="absolute grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center"
+                className="absolute grid size-12 -translate-x-1/2 -translate-y-1/2 place-items-center"
                 style={{ left: `${p.x * 100}%`, top: `${p.y * 100}%` }}
               >
                 <span
-                  className={`grid size-8 place-items-center rounded-full border-[1.5px] border-brand-400 text-[0.7rem] font-semibold shadow-[0_8px_18px_-8px_rgba(23,23,23,0.6)] transition-[background-color,color,scale] duration-500 ease-luxe ${
-                    active ? 'scale-115 bg-brand-600 text-ivory-50' : 'bg-ink-900 text-brand-400'
+                  className={`grid size-[38px] place-items-center rounded-full border-2 text-[14px] font-bold tabular-nums shadow-[0_8px_18px_-8px_rgba(23,23,23,0.6)] transition-[background-color,color,border-color,scale] duration-500 ease-luxe ${
+                    active ? 'scale-115 border-ivory-50 bg-brand-600 text-ivory-50' : 'border-brand-400 bg-ink-900 text-brand-400'
                   }`}
                 >
                   {pad2(i + 1)}

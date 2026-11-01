@@ -47,8 +47,14 @@ export function createStudioMap(container, { studios, reduceMotion, isCompact, o
   const located = studios.filter((s) => s.coordinates)
   const bounds = located.reduce((b, s) => b.extend(toLngLat(s.coordinates)), new LngLatBounds())
 
-  // Room for the circular markers (≈44px) on every side; on desktop the details panel covers the left.
-  const fitPadding = () => (isCompact() ? { top: 48, bottom: 48, left: 36, right: 36 } : { top: 72, bottom: 72, left: 80, right: 80 })
+  // Room for the circular markers (48px) on every side. Bottom is a little deeper than top so the
+  // southernmost studio (Strzelin) never sits on the edge; the top leaves space for the name tooltip.
+  // Tablets (compact layout, wider container) get a step between phone and desktop.
+  const fitPadding = () => {
+    if (!isCompact()) return { top: 84, bottom: 96, left: 88, right: 88 }
+    if (container.clientWidth >= 600) return { top: 64, bottom: 80, left: 56, right: 56 }
+    return { top: 52, bottom: 68, left: 36, right: 36 }
+  }
   const focusPadding = () => (isCompact() ? { top: 40, bottom: 40, left: 24, right: 24 } : { top: 60, bottom: 60, left: 420, right: 60 })
 
   const map = new Map({
@@ -216,11 +222,51 @@ function scalePadding(padding, factor) {
   return Object.fromEntries(Object.entries(padding).map(([k, v]) => [k, Math.round(v * factor)]))
 }
 
-/** Gentle brand tuning of the Positron style: warm-white land, soft warm-grey water. */
+/**
+ * Gentle brand tuning of the Positron style: warm-white land, soft warm-grey water, and a touch
+ * more cartographic contrast — crisper place labels and slightly firmer main roads, still monochrome.
+ * Layer ids are from OpenFreeMap Positron; each change is skipped if a layer is missing.
+ * Runs on 'load', when the style is fully parsed.
+ */
 function warmUpStyle(map) {
-  const set = (layer, prop, value) => {
+  const paint = (layer, prop, value) => {
     if (map.getLayer(layer)) map.setPaintProperty(layer, prop, value)
   }
-  set('background', 'background-color', '#f8f4ef')
-  set('water', 'fill-color', '#e4e2dd')
+  const layout = (layer, prop, value) => {
+    if (map.getLayer(layer)) map.setLayoutProperty(layer, prop, value)
+  }
+  paint('background', 'background-color', '#f8f4ef')
+  paint('water', 'fill-color', '#e4e2dd')
+
+  // Place names: ink instead of pure black, with a sharp warm-white halo (the default is blurred).
+  for (const id of ['label_city', 'label_city_capital', 'label_town', 'label_village']) {
+    paint(id, 'text-color', '#171717')
+    paint(id, 'text-halo-color', '#f8f4ef')
+    paint(id, 'text-halo-width', 1.6)
+    paint(id, 'text-halo-blur', 0.3)
+  }
+  paint('label_other', 'text-color', '#3d3a36')
+  paint('label_other', 'text-halo-color', '#f8f4ef')
+  paint('label_other', 'text-halo-blur', 0.3)
+  // One step larger for towns and villages (the overview sits around zoom 9–10).
+  layout('label_town', 'text-size', ['interpolate', ['exponential', 1.2], ['zoom'], 7, 13, 11, 15])
+  layout('label_village', 'text-size', ['interpolate', ['exponential', 1.2], ['zoom'], 7, 11, 11, 13])
+
+  // Street names and waterways: a little darker, same quiet greys.
+  for (const id of ['highway-name-major', 'highway-name-minor']) {
+    paint(id, 'text-color', '#4a4641')
+    paint(id, 'text-halo-color', '#f8f4ef')
+    paint(id, 'text-halo-width', 1.2)
+  }
+  paint('waterway_line_label', 'text-color', '#8c867e')
+
+  // Main roads: warm-grey casings and low-zoom lines, readable but not colourful.
+  for (const id of ['highway_major_casing', 'highway_motorway_casing', 'highway_motorway_bridge_casing']) {
+    paint(id, 'line-color', '#cdc6bd')
+  }
+  paint('highway_major_subtle', 'line-color', 'rgba(196, 189, 180, 0.8)')
+  paint('highway_motorway_subtle', 'line-color', 'rgba(188, 180, 170, 0.75)')
+  for (const id of ['highway_motorway_inner', 'highway_motorway_bridge_inner']) {
+    paint(id, 'line-color', ['interpolate', ['linear'], ['zoom'], 5.8, 'rgba(188, 180, 170, 0.75)', 6, '#ffffff'])
+  }
 }
