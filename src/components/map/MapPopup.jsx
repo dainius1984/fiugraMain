@@ -9,9 +9,8 @@ import { directionsUrl, primaryLink } from '../../lib/studio-utils'
 const NEW_TAB = ' (otwiera się w nowej karcie)'
 
 /**
- * Studio details shown after selecting a marker or a selector item.
- * Phones/tablets: a panel directly below the map (the map stays fully visible).
- * Desktop: a floating panel over the top-left of the map.
+ * Desktop studio details shown after selecting a marker or a selector item: a floating panel over
+ * the top-left of the map. (Phones/tablets use MapStudioSheet, a bottom sheet, instead.)
  * Nothing redirects automatically — the visitor chooses the next step here.
  */
 export default function MapPopup({ studio, number, onClose, reduceMotion, panelRef }) {

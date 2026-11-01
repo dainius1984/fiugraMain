@@ -40,10 +40,11 @@ export function webgl2Supported() {
 /**
  * @param {HTMLElement} container
  * @param {{ studios: object[], reduceMotion: boolean, isCompact: () => boolean,
+ *           focusInsets?: () => ({ top?: number, bottom?: number } | null),
  *           onSelect: (id: string, trigger: HTMLElement) => void,
  *           onReady: () => void, onError?: (error: Error) => void }} options
  */
-export function createStudioMap(container, { studios, reduceMotion, isCompact, onSelect, onReady, onError }) {
+export function createStudioMap(container, { studios, reduceMotion, isCompact, focusInsets, onSelect, onReady, onError }) {
   const located = studios.filter((s) => s.coordinates)
   const bounds = located.reduce((b, s) => b.extend(toLngLat(s.coordinates)), new LngLatBounds())
 
@@ -55,7 +56,16 @@ export function createStudioMap(container, { studios, reduceMotion, isCompact, o
     if (container.clientWidth >= 600) return { top: 64, bottom: 80, left: 56, right: 56 }
     return { top: 52, bottom: 68, left: 36, right: 36 }
   }
-  const focusPadding = () => (isCompact() ? { top: 40, bottom: 40, left: 24, right: 24 } : { top: 60, bottom: 60, left: 420, right: 60 })
+  // Compact layouts: `focusInsets` reports how much of the map the sticky header and the details
+  // bottom sheet cover, so the focused studio is centred in the part that stays visible.
+  const focusPadding = () => {
+    if (!isCompact()) return { top: 60, bottom: 60, left: 420, right: 60 }
+    const insets = focusInsets?.() ?? {}
+    const top = Math.min(40 + (insets.top ?? 0), container.clientHeight / 2)
+    // Always leave at least ~96px of map between the paddings.
+    const bottom = Math.max(40, Math.min(40 + (insets.bottom ?? 0), container.clientHeight - top - 96))
+    return { top, bottom, left: 24, right: 24 }
+  }
 
   const map = new Map({
     container,

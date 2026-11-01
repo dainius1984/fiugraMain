@@ -11,7 +11,7 @@ export default function MapLocationSelector({ studios, selectedId, onSelect, con
             <li key={studio.id}>
               <button
                 type="button"
-                onClick={(event) => onSelect(studio.id, event.currentTarget)}
+                onClick={(event) => onSelect(studio.id, event.currentTarget, event)}
                 data-studio-selector={studio.id}
                 aria-pressed={active}
                 aria-controls={controlsId}

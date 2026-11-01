@@ -1,14 +1,33 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { MapPinned, MousePointerClick, RotateCcw } from 'lucide-react'
 import Reveal, { EASE } from './Reveal'
 import MapPopup from './map/MapPopup'
+import MapStudioSheet from './map/MapStudioSheet'
 import MapLocationSelector from './map/MapLocationSelector'
 import { locationsPhrase, pad2 } from '../lib/studio-utils'
 
 const CONSENT_KEY = 'sf-map-consent'
 const DESKTOP = '(min-width: 1024px)'
 const LOAD_TIMEOUT_MS = 20000
+// Space between the sticky navigation and the map frame after the reveal scroll.
+const MAP_GAP = 12
+// Fallback for browsers without `scrollend` (the camera waits for the page scroll to settle).
+const SCROLL_SETTLE_MS = 900
+
+const desktopQuery = window.matchMedia(DESKTOP)
+const subscribeDesktop = (onChange) => {
+  desktopQuery.addEventListener('change', onChange)
+  return () => desktopQuery.removeEventListener('change', onChange)
+}
+const isDesktopNow = () => desktopQuery.matches
+const siteHeader = () => document.querySelector('header')
+/** Document offset of an element, ignoring transforms (e.g. a Reveal entrance still in progress). */
+const layoutTop = (el) => {
+  let y = 0
+  for (let node = el; node; node = node.offsetParent) y += node.offsetTop
+  return y
+}
 
 /**
  * The studio finder — the site's central feature.
@@ -17,20 +36,32 @@ const LOAD_TIMEOUT_MS = 20000
  * "Pokaż interaktywną mapę" (remembered on this device). Until then a static preview shows the
  * studios at their true relative positions, and the selector + details panel work fully.
  *
- * One `selectedId` drives markers, selector and the details panel.
+ * One `selectedId` drives markers, selector and the details panel (desktop: floating panel over
+ * the map; phones/tablets: bottom sheet). On phones/tablets, choosing a studio in the list below
+ * the map scrolls the map back into view first, then the camera flies to the studio.
  */
 export default function StudioMap({ studios }) {
   const located = useMemo(() => studios.filter((s) => s.coordinates), [studios])
   const reduceMotion = useReducedMotion()
+  const isDesktop = useSyncExternalStore(subscribeDesktop, isDesktopNow)
   const sectionRef = useRef(null)
+  const frameRef = useRef(null)
   const mapEl = useRef(null)
   const panelRef = useRef(null)
   const controllerRef = useRef(null)
   const openerRef = useRef(null)
+  // Pending list-triggered scroll: { plannedTop, settled } — consumed by the next camera focus.
+  const revealRef = useRef(null)
+  // Map frame's viewport top once that scroll ends (set only while the camera target is computed).
+  const plannedTopRef = useRef(null)
+  const focusSheetRef = useRef(false)
 
   const [selectedId, setSelectedId] = useState(null)
+  // Bumped on every explicit selection, so choosing the same studio again refocuses the camera.
+  const [selectionSeq, setSelectionSeq] = useState(0)
   const [consent, setConsent] = useState(false)
   const [nearViewport, setNearViewport] = useState(false)
+  const [sectionInView, setSectionInView] = useState(false)
   const [status, setStatus] = useState('preview') // preview | loading | ready | unsupported | error
   const [attempt, setAttempt] = useState(0)
   // The camera stays on a studio after its details close, until the overview is restored.
@@ -42,7 +73,61 @@ export default function StudioMap({ studios }) {
   const selectStudio = useCallback((id, trigger) => {
     openerRef.current = trigger
     setSelectedId(id)
+    setSelectionSeq((n) => n + 1)
     setZoomedIn(true)
+  }, [])
+
+  // Phones/tablets: scroll so the map frame sits just below the sticky navigation.
+  const revealMap = useCallback(() => {
+    revealRef.current = null
+    const frame = frameRef.current
+    if (!frame) return
+    const frameTop = layoutTop(frame)
+    const headerHeight = siteHeader()?.offsetHeight ?? 0
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight
+    const target = Math.round(Math.max(0, Math.min(maxScroll, frameTop - headerHeight - MAP_GAP)))
+    if (Math.abs(target - window.scrollY) < 2) return
+    const settled = reduceMotion
+      ? Promise.resolve()
+      : new Promise((resolve) => {
+          const done = () => {
+            clearTimeout(timer)
+            window.removeEventListener('scrollend', done)
+            resolve()
+          }
+          const timer = setTimeout(done, SCROLL_SETTLE_MS)
+          window.addEventListener('scrollend', done)
+        })
+    revealRef.current = { plannedTop: frameTop - target, settled }
+    // 'instant' (not 'auto'): html has `scroll-behavior: smooth`, which 'auto' would inherit.
+    window.scrollTo({ top: target, behavior: reduceMotion ? 'instant' : 'smooth' })
+  }, [reduceMotion])
+
+  const selectFromList = useCallback((id, trigger, event) => {
+    if (!desktopQuery.matches) {
+      focusSheetRef.current = event?.detail === 0 // keyboard: move focus into the sheet
+      revealMap()
+    }
+    selectStudio(id, trigger)
+  }, [revealMap, selectStudio])
+
+  // How much of the map the header and the bottom sheet cover (compact layouts; read by the map).
+  const focusInsets = useCallback(() => {
+    const frame = frameRef.current
+    if (!frame) return null
+    const rect = frame.getBoundingClientRect()
+    const planned = plannedTopRef.current
+    const top = planned ?? rect.top
+    const header = siteHeader()
+    // After a reveal scroll (upwards) the auto-hiding navigation is shown.
+    const headerBottom = planned != null ? (header?.offsetHeight ?? 0) : Math.max(0, header?.getBoundingClientRect().bottom ?? 0)
+    const sheet = panelRef.current
+    // offsetHeight ignores the sheet's entry transform; `bottom` is its resting offset.
+    const sheetTop = sheet ? window.innerHeight - sheet.offsetHeight - (parseFloat(getComputedStyle(sheet).bottom) || 0) : Infinity
+    return {
+      top: Math.max(0, headerBottom - top),
+      bottom: Math.max(0, top + rect.height - sheetTop),
+    }
   }, [])
 
   const closeDetails = useCallback((event) => {
@@ -67,8 +152,16 @@ export default function StudioMap({ studios }) {
       /* storage unavailable: ask again */
     }
     const io = new IntersectionObserver(([entry]) => entry.isIntersecting && setNearViewport(true), { rootMargin: '400px 0px' })
-    if (sectionRef.current) io.observe(sectionRef.current)
-    return () => io.disconnect()
+    // The bottom sheet belongs to the map: it steps aside while the section is scrolled away.
+    const inView = new IntersectionObserver(([entry]) => setSectionInView(entry.isIntersecting))
+    if (sectionRef.current) {
+      io.observe(sectionRef.current)
+      inView.observe(sectionRef.current)
+    }
+    return () => {
+      io.disconnect()
+      inView.disconnect()
+    }
   }, [])
 
   // Lazy-load MapLibre and create the single map instance.
@@ -103,7 +196,8 @@ export default function StudioMap({ studios }) {
           controller = createStudioMap(mapEl.current, {
             studios: located,
             reduceMotion: Boolean(reduceMotion),
-            isCompact: () => !window.matchMedia(DESKTOP).matches,
+            isCompact: () => !desktopQuery.matches,
+            focusInsets,
             onSelect: selectStudio,
             onReady: () => {
               if (cancelled || failed) return
@@ -126,24 +220,40 @@ export default function StudioMap({ studios }) {
     }
     // The studio list is static data; reduced-motion is read once at creation.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [consent, nearViewport, attempt, selectStudio])
+  }, [consent, nearViewport, attempt, selectStudio, focusInsets])
 
-  // Sync selection → markers + camera.
+  // Sync selection → markers + camera. After a list selection on phones the camera waits for the
+  // page scroll to settle, so the visitor sees the flight, and frames the studio above the sheet.
   useEffect(() => {
+    const reveal = revealRef.current
+    revealRef.current = null
     const controller = controllerRef.current
     if (!controller || status !== 'ready') return
     controller.setActive(selectedId)
-    if (selectedId) controller.focus(selectedId)
-  }, [selectedId, status])
+    if (!selectedId) return
+    let cancelled = false
+    const run = () => {
+      if (cancelled) return
+      plannedTopRef.current = reveal?.plannedTop ?? null
+      controller.focus(selectedId)
+      plannedTopRef.current = null
+    }
+    if (reveal) reveal.settled.then(run)
+    else run()
+    return () => {
+      cancelled = true
+    }
+  }, [selectedId, selectionSeq, status])
 
-  // On phones the details panel sits under the map: bring it into view after a selection.
+  // Escape closes the sheet even when focus is outside the map section (the section handles the rest).
   useEffect(() => {
-    if (!selectedId || window.matchMedia(DESKTOP).matches) return
-    const id = requestAnimationFrame(() =>
-      panelRef.current?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'nearest' })
-    )
-    return () => cancelAnimationFrame(id)
-  }, [selectedId, reduceMotion])
+    if (!selectedId || isDesktop) return
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape' && !sectionRef.current?.contains(event.target)) closeDetails(event)
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [selectedId, isDesktop, closeDetails])
 
   const activate = useCallback(() => {
     setAttempt((value) => value + 1)
@@ -198,7 +308,7 @@ export default function StudioMap({ studios }) {
           </p>
           <div className="relative">
             {/* Map frame — fixed height (no layout shift); preview underneath, live map fades in on top */}
-            <div className="relative isolate h-[clamp(360px,56svh,440px)] overflow-hidden rounded-[1.25rem] bg-ivory-200 shadow-[0_30px_70px_-45px_rgba(23,23,23,0.45)] ring-1 ring-brand-200 md:h-[500px] md:rounded-[1.5rem] lg:h-[600px] xl:h-[640px]">
+            <div ref={frameRef} className="relative isolate h-[clamp(360px,56svh,440px)] overflow-hidden rounded-[1.25rem] bg-ivory-200 shadow-[0_30px_70px_-45px_rgba(23,23,23,0.45)] ring-1 ring-brand-200 md:h-[500px] md:rounded-[1.5rem] lg:h-[600px] xl:h-[640px]">
               <MapPreview
                 studios={located}
                 selectedId={selectedId}
@@ -232,18 +342,19 @@ export default function StudioMap({ studios }) {
               </AnimatePresence>
             </div>
 
-            <AnimatePresence mode="wait">
-              {selected && (
-                <MapPopup
-                  key={selected.id}
-                  studio={selected}
-                  number={pad2(selectedIndex + 1)}
-                  onClose={closeDetails}
-                  reduceMotion={reduceMotion}
-                  panelRef={panelRef}
-                />
-              )}
-            </AnimatePresence>
+            {isDesktop && (
+              <AnimatePresence mode="wait">
+                {selected && (
+                  <MapPopup
+                    key={selected.id}
+                    studio={selected}
+                    number={pad2(selectedIndex + 1)}
+                    onClose={closeDetails}
+                    reduceMotion={reduceMotion}
+                  />
+                )}
+              </AnimatePresence>
+            )}
           </div>
         </Reveal>
 
@@ -254,10 +365,32 @@ export default function StudioMap({ studios }) {
         <MapLocationSelector
           studios={located}
           selectedId={selectedId}
-          onSelect={selectStudio}
+          onSelect={selectFromList}
           controlsId="map-studio-details"
         />
       </div>
+
+      {!isDesktop && (
+        <MapStudioSheet
+          studio={selected}
+          number={pad2(selectedIndex + 1)}
+          open={Boolean(selected) && sectionInView}
+          onClose={closeDetails}
+          reduceMotion={reduceMotion}
+          panelRef={panelRef}
+          focusOnOpen={focusSheetRef}
+          // Before activation the sheet offers the same consent action as the preview card.
+          mapAction={
+            live || status === 'unsupported'
+              ? null
+              : {
+                  onClick: activate,
+                  busy: status === 'loading',
+                  label: status === 'loading' ? 'Wczytywanie mapy…' : status === 'error' ? 'Spróbuj ponownie wczytać mapę' : 'Pokaż interaktywną mapę',
+                }
+          }
+        />
+      )}
     </section>
   )
 }
